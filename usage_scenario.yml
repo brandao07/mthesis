@@ -1,0 +1,16 @@
+name: My Go Fibonacci Test
+author: André Brandão <https://github.com/brandao07>
+description: Testing Go Fibonacci
+
+services:
+  go-container:
+    image: golang:1.25-alpine
+    command: sleep infinity
+
+flow:
+  - name: Go-Fibonacci
+    container: go-container
+    commands:
+      - type: console
+        command: go run /tmp/repo/src/langs/go/fib.go
+        note: Running Fibonacci in Go
