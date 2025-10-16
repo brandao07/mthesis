@@ -42,5 +42,3 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 # # Set the working directory inside the container
 WORKDIR /app
 COPY . .
-
-RUN node ./src/langs/js/fib.js > /app/fib.log

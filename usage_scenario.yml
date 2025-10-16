@@ -1,6 +1,6 @@
-name: My Fibonacci Test
+name: My CLBG Test
 author: André Brandão <https://github.com/brandao07>
-description: Testing Fibonacci
+description: Testing CLBG Go
 
 services:
   my-container:
@@ -11,16 +11,58 @@ services:
     command: sleep infinity
 
 flow:
-  - name: Go-Fibonacci
+  - name: Go-Binary-Trees
     container: my-container
     commands:
       - type: console
-        command: go run /tmp/repo/src/langs/go/fib.go
-        note: Running Fibonacci in Go
+        command: go run /tmp/repo/src/langs/go/binary-trees/main.go 21
+        note: Running Binary-Trees in Go
 
-  - name: JS-Fibonacci
+  - name: Go-Fannkuch-Redux
     container: my-container
     commands:
       - type: console
-        command: node /tmp/repo/src/langs/js/fib.js
-        note: Running Fibonacci in JS
+        command: go run /tmp/repo/src/langs/go/fannkuch-redux/main.go 12
+        note: Running Fannkuch-Redux in Go
+
+  - name: Go-Fasta
+    container: my-container
+    commands:
+      - type: console
+        command: go run /tmp/repo/src/langs/go/fasta/main.go 25000000
+        note: Running Fasta in Go
+
+  - name: Go-K-Nucleotide
+    container: my-container
+    commands:
+      - type: console
+        command: sh -c "go run /tmp/repo/src/langs/go/k-nucleotide/main.go < /tmp/repo/fasta-2500000.txt"
+        note: Running K-Nucleotide in Go
+
+  - name: Go-Mandelbrot
+    container: my-container
+    commands:
+      - type: console
+        command: go run /tmp/repo/src/langs/go/mandelbrot/main.go 16000
+        note: Running Mandelbrot in Go
+
+  - name: Go-N-Body
+    container: my-container
+    commands:
+      - type: console
+        command: go run /tmp/repo/src/langs/go/n-body/main.go 50000000
+        note: Running N-Body in Go
+
+  - name: Go-Regex-Redux
+    container: my-container
+    commands:
+      - type: console
+        command: sh -c "go run /tmp/repo/src/langs/go/regex-redux/main.go < /tmp/repo/fasta-2500000.txt"
+        note: Running Regex-Redux in Go
+
+  - name: Go-Spectral-Norm
+    container: my-container
+    commands:
+      - type: console
+        command: go run /tmp/repo/src/langs/go/spectral-norm/main.go 5500
+        note: Running Spectral-Norm in Go

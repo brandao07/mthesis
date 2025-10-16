@@ -5,4 +5,4 @@ VENV := ./venv/bin/activate
 run:
 	cd $(GMT_DIR) && \
 	source $(VENV) && \
-	python3 runner.py --uri /Users/brandao/mthesis --name run
+	python3 runner.py --uri /Users/brandao/mthesis --name run --dev-no-sleeps
