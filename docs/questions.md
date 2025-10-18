@@ -12,7 +12,7 @@
 
 3. Consegui por o GMT a funcionar só que por algum motivo muitas das métricas não foram retiradas (ex: consumo de energia, DRAM). Eles referem na documentação que a versão para o macOS está bastante limitada e só é recomendada para testes [ref](https://docs.green-coding.io/docs/installation/installation-macos/#:~:text=Running%20the%20GMT%20on%20Macs%20will%20never%20give%20you%20correct%20measurements!%20It%20should%20only%20ever%20be%20used%20to%20test%20your%20project%20for%20correctness%20in%20that%20it%20will%20run%20on%20the%20GMT%20but%20never%20to%20benchmark%20software). O que seria melhor fazer?
 
-   - A: 
+- A:
 
 # Oct 12 2025
 
@@ -29,4 +29,14 @@ Durante a pesquisa, encontrei a seguinte documentação que pode ajudar:
 
 No entanto, a documentação da API é um pouco vaga. Gostava de contar com algum apoio do lado da **empresa responsável pela ferramenta**, se possível.
 
-   - A:
+- A:
+
+# Oct 18 2025
+
+6. Configurei os _benchmarks_ do CLBG em Go com a Green Metrics Tool e identifiquei os seguintes problemas: devido ao tamanho elevado do _output_ gerado pelos programas **fasta** e **mandelbrot**, o GMT acaba por falhar ao tentar guardar os registos (_logs_), uma vez que excede o limite do _buffer_. Encontrei uma solução sugerida pela própria ferramenta, através da opção `log-stdout` ([referência](<https://docs.green-coding.io/docs/measuring/usage-scenario/#:~:text=in%20your%20container-,log%2Dstdout%3A%20%5Bboolean%5D%20(optional%2C%20default%3A%20true),and%20make%20it%20available%20through%20the%20frontend%20in%20the%20Logs%20tab.,-Please%20see%20the>)).
+
+Além disso, a documentação recomenda que, sempre que o volume de _logs_ for excessivo, estes devem ser desativados, de forma a evitar sobrecarga e erros de execução ([_Best Practices_](https://docs.green-coding.io/docs/measuring/best-practices/#:~:text=However%2C%20you%20should%20consider%20turning%20logging%20off%20when%20there%20is%20extensive%20logging%20output%2C%20as%20it%20can%20create%20overhead.)).
+
+No entanto, permanece a dúvida sobre se desativar os _logs_ desta forma poderá afetar o desempenho dos _benchmarks_ que avaliam operações de entrada/saída (_I/O_), uma vez que esses resultados são relevantes para a análise global de desempenho.
+
+- A:

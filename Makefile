@@ -1,8 +1,24 @@
 # Path to your Green Metrics Tool installation
 GMT_DIR := /Users/brandao/green-metrics-tool
-VENV := ./venv/bin/activate
+VENV := $(GMT_DIR)/venv/bin/activate
+URI := /Users/brandao/mthesis
 
+# Base command to run Green Metrics Tool
+RUN_GMT = source $(VENV) && \
+    python3 $(GMT_DIR)/runner.py \
+        --uri $(URI) \
+        --name run$(lang) \
+        --filename ./benchmarks/$(lang)/default.yml \
+        --filename ./benchmarks/$(lang)/fasta.yml \
+        --filename ./benchmarks/$(lang)/mandelbrot.yml \
+        --dev-no-sleeps \
+        --iterations 1 \
+        --docker-prune
+
+# General run target
 run:
-	cd $(GMT_DIR) && \
-	source $(VENV) && \
-	python3 runner.py --uri /Users/brandao/mthesis --name run --dev-no-sleeps
+	@if [ -z "$(lang)" ]; then \
+		echo "Please provide the language, e.g., make run lang=go"; \
+		exit 1; \
+	fi
+	@$(RUN_GMT)
