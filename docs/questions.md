@@ -44,3 +44,38 @@ Além disso, a documentação recomenda que, sempre que o volume de _logs_ for e
 No entanto, permanece a dúvida sobre se desativar os _logs_ desta forma poderá afetar o desempenho dos _benchmarks_ que avaliam operações de entrada/saída (_I/O_), uma vez que esses resultados são relevantes para a análise global de desempenho.
 
 - A:
+
+# Oct 19 2025
+
+7.  Estou a pensar criar um programa que tenha duas funcionalidades:
+
+    1.  Aceita um array de requests e submete na API da GMT.
+
+        Exemplo:
+
+        ```json
+        {
+          "name": "My Benchmark",
+          "repo_url": "https://github.com/brandao07/mthesis",
+          "email": "andrebrandleao@hotmail.com",
+          "branch": "main",
+          "machine_id": 5,
+          "schedule_mode": "one-off",
+          "benchmarks": [
+            {
+              "name": "Go",
+              "filename": "./benchmarks/go/default.yml"
+            },
+            {
+              "name": "NodeJS",
+              "filename": "./benchmarks/nodejs/default.yml"
+            }
+          ]
+        }
+        ```
+
+    2.  O programa recebe um array de UUIDs de execuções e, para cada um, faz uma requisição ao endpoint `https://api.green-coding.io/v1/phase_stats/single/{run_id}`. Em seguida, extrai os dados relevantes das respostas JSON e converte-os num ficheiro CSV legível, onde cada linha representa uma execução (um UUID) e contém as principais métricas obtidas do endpoint.
+
+Gostava de saber a vossa opinião.
+
+A:

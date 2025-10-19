@@ -41,3 +41,46 @@ The Green Metrics Tool is primarily designed to measure containerized applicatio
   - Energy: min 1 µJ
   - Temp: min 0.01 °C
   - Utilization: min 0.01
+
+# Oct 19 2025
+
+## [Green Metrics Tool API](https://api.green-coding.io/docs)
+
+### Submit Software
+
+**POST** `https://api.green-coding.io/v1/software/add`
+
+Example Payload
+
+```json
+{
+  "name": "mthesis",
+  "repo_url": "https://github.com/brandao07/mthesis",
+  "email": "<email>",
+  "filename": "./benchmarks/go/default.yml",
+  "branch": "main",
+  "machine_id": 5,
+  "schedule_mode": "one-off"
+}
+```
+
+Example Response
+
+```json
+{
+  "success": true,
+  "data": [59926]
+}
+```
+
+### Get Phase Stats
+
+**GET** `https://api.green-coding.io/v1/phase_stats/single/{run_id}`
+
+Example Response
+
+`mthesis/example-response.json`
+
+## Other notes
+
+I decided to run a separate container for each programming language to avoid creating an excessively large Docker image. I found that combining multiple compilers within a single image introduced unnecessary complexity and maintenance challenges.
