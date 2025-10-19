@@ -12,6 +12,8 @@
 
 3. Consegui por o GMT a funcionar só que por algum motivo muitas das métricas não foram retiradas (ex: consumo de energia, DRAM). Eles referem na documentação que a versão para o macOS está bastante limitada e só é recomendada para testes [ref](https://docs.green-coding.io/docs/installation/installation-macos/#:~:text=Running%20the%20GMT%20on%20Macs%20will%20never%20give%20you%20correct%20measurements!%20It%20should%20only%20ever%20be%20used%20to%20test%20your%20project%20for%20correctness%20in%20that%20it%20will%20run%20on%20the%20GMT%20but%20never%20to%20benchmark%20software). O que seria melhor fazer?
 
+**Update:** Testei na máquina deles e as métricas estão a ser todas retiradas [Exemplo](https://metrics.green-coding.io/stats.html?id=0d643526-d741-4be4-94d5-f936b4f4f923).
+
 - A:
 
 # Oct 12 2025
@@ -27,7 +29,9 @@
 Durante a pesquisa, encontrei a seguinte documentação que pode ajudar:  
 [Export Formats — Green Metrics Tool](https://docs.green-coding.io/docs/declarations/export-formats/#:~:text=Export%20formats,-Green%20Metrics%20Tool)
 
-No entanto, a documentação da API é um pouco vaga. Gostava de contar com algum apoio do lado da **empresa responsável pela ferramenta**, se possível.
+No entanto, a documentação da API é um pouco vaga. Gostava de contar com algum apoio do lado da **empresa responsável pela ferramenta**, se possível. **(DEPRECATED)**
+
+**Update:** Descobri o endpoint que queremos (ACHO EU), `https://api.green-coding.io/v1/phase_stats/single/<run-uuid>` é preciso confirmar.
 
 - A:
 
