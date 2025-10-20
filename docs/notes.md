@@ -84,3 +84,9 @@ Example Response
 ## Other notes
 
 I decided to run a separate container for each programming language to avoid creating an excessively large Docker image. I found that combining multiple compilers within a single image introduced unnecessary complexity and maintenance challenges.
+
+# Oct 20 2025
+
+## [GMT Dashboard](https://metrics.green-coding.io/index.html)
+
+I managed to submit Go benchmarks to the Green Metrics Tool Cluster, [Example](https://metrics.green-coding.io/stats.html?id=dc73453a-4297-4cd5-aa89-eea6901778cb).

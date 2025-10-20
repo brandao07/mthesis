@@ -18,9 +18,13 @@
 
 # Oct 12 2025
 
-4. Para obter os resultados, é necessário executar o ficheiro `usage_scenario.yml`. Teríamos de o executar **x** vezes, uma vez que este ficheiro contém todos os benchmarks. Gostaria de saber a vossa opinião sobre esta abordagem. **(DEPRECATED)**
+4. Para obter os resultados, é necessário executar o ficheiro `usage_scenario.yml`. Teríamos de o executar **x** vezes, uma vez que este ficheiro contém todos os benchmarks. Gostaria de saber a vossa opinião sobre esta abordagem.
 
-   - A: Em relação à pergunta `4.`, encontrei esta informação [ref](https://docs.green-coding.io/docs/measuring/comparing-measurements/#:~:text=in%20all%20runs.-,Comparing%20repeated%20runs,-%23), pelo que percebi pelo GUI deles dá para configurar quantas runs é que quero executar e depois compilar. (André)
+Em relação à pergunta `4.`, encontrei esta informação [ref](https://docs.green-coding.io/docs/measuring/comparing-measurements/#:~:text=in%20all%20runs.-,Comparing%20repeated%20runs,-%23), pelo que percebi pelo GUI deles dá para configurar quantas runs é que quero executar e depois compilar. (André)
+
+**UPDATE:** Estive a procura e esta configuração apenas é permitida em ambiente local, a não ser que esteja disponível na versão premium da ferramenta.
+
+- A:
 
 # Oct 16 2025
 
@@ -57,7 +61,7 @@ No entanto, permanece a dúvida sobre se desativar os _logs_ desta forma poderá
         {
           "name": "My Benchmark",
           "repo_url": "https://github.com/brandao07/mthesis",
-          "email": "andrebrandleao@hotmail.com",
+          "email": "<email>",
           "branch": "main",
           "machine_id": 5,
           "schedule_mode": "one-off",
@@ -78,4 +82,10 @@ No entanto, permanece a dúvida sobre se desativar os _logs_ desta forma poderá
 
 Gostava de saber a vossa opinião.
 
-A:
+- A:
+
+# Oct 20 2025
+
+8. Ao submeter um software para o GMT tenho a opção de escolher entre várias máquinas. [Measurement Clusters](https://docs.green-coding.io/docs/measuring/measurement-cluster/). Estou na dúvida qual máquina escolher entre a `CO2 Profiling`, `CO2 Benchmarking` ou `Micro Benchmarking`.
+
+- A:
