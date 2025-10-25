@@ -89,3 +89,7 @@ Gostava de saber a vossa opinião.
 8. Ao submeter um software para o GMT tenho a opção de escolher entre várias máquinas. [Measurement Clusters](https://docs.green-coding.io/docs/measuring/measurement-cluster/). Estou na dúvida qual máquina escolher entre a `CO2 Profiling`, `CO2 Benchmarking` ou `Micro Benchmarking`.
 
 - A:
+
+# Oct 24 2025
+
+9. É possível medir o consumo total?
