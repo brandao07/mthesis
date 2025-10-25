@@ -12,6 +12,6 @@ flow:
     container: c-container
     commands:
       - type: console
-        command: gcc /tmp/repo/benchmarks/c/fibonacci/main.c -o /tmp/main
+        command: gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp /tmp/repo/benchmarks/c/fibonacci/main.c -o /tmp/main
       - type: console
         command: /tmp/main
