@@ -1,15 +1,15 @@
 # Benchmarks used
 
-## C
+## C ✅
 
-- [binary-trees]()
-- [fannkuch-redux]()
-- [fasta]()
-- [k-nucleotide]()
-- [mandelbrot]()
-- [n-body]()
-- [regex-redux]()
-- [spectral-norm]()
+- [binary-trees](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-gcc-5.html)
+- [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-gcc-5.html)
+- [fasta](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fasta-gcc-3.html)
+- [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-gcc-1.html)
+- [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-gcc-5.html)
+- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-gcc-6.html)
+- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-gcc-5.html)
+- [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-gcc-3.html)
 
 ## C++
 
@@ -89,6 +89,17 @@
 - [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-go-4.html)
 
 ## Haskell
+
+- [binary-trees]()
+- [fannkuch-redux]()
+- [fasta]()
+- [k-nucleotide]()
+- [mandelbrot]()
+- [n-body]()
+- [regex-redux]()
+- [spectral-norm]()
+
+## Java
 
 - [binary-trees]()
 - [fannkuch-redux]()
