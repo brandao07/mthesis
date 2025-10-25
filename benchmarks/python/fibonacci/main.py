@@ -6,6 +6,6 @@ def recur_fibo(n):
    else:
        return(recur_fibo(n-1) + recur_fibo(n-2))
 
-n = 50
+n = 49
 
 print(recur_fibo(n))

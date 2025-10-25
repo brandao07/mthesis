@@ -11,7 +11,7 @@ int fibbonacci(int n) {
 }
 
 int main() {
-  	int n = 50;
+  	int n = 49;
 
 	printf("%d ",fibbonacci(n));  
 	
