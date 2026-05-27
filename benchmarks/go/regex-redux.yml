@@ -9,7 +9,7 @@ services:
       - shell: sh
         command: apk add --no-cache gcc musl-dev pcre-dev
       - shell: sh
-        command: mkdir -p /tmp/go-regex-redux-src && cp /tmp/repo/benchmarks/go/regex-redux/main.go /tmp/go-regex-redux-src/ && cd /tmp/go-regex-redux-src && go mod init regex-redux && go get github.com/GRbit/go-pcre && go build -o /tmp/go-regex-redux .
+        command: mkdir -p /tmp/go-regex-redux-src && cp /tmp/repo/benchmarks/go/regex-redux/main.go /tmp/go-regex-redux-src/ && cd /tmp/go-regex-redux-src && go mod init regex-redux && go get github.com/GRbit/go-pcre@v1.0.0 && go build -o /tmp/go-regex-redux .
     command: sleep infinity
 
 flow:
