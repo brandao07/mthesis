@@ -5,6 +5,8 @@ description: Python benchmarks using Python 3.13 Alpine
 services:
   python-container:
     image: python:3.13-alpine3.22
+    setup-commands:
+      - command: apk add --no-cache pcre2
     command: sleep infinity
 
 flow:
