@@ -46,16 +46,16 @@ Build system: `cargo` (most benchmarks) or direct `rustc` (n-body).
 
 `RUSTFLAGS` are set in each benchmark's `build_in_tmp.sh`.
 
-| Benchmark      | RUSTFLAGS / command                                                   | Notes                          |
-|----------------|-----------------------------------------------------------------------|--------------------------------|
-| binary-trees   | `-C opt-level=3 -C target-cpu=ivybridge -C codegen-units=1`         | Should be `native` — inconsistency to fix |
-| fannkuch-redux | `-C opt-level=3 -C target-cpu=ivybridge -C codegen-units=1`         | Should be `native` — inconsistency to fix |
-| fasta          | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            |                                |
-| k-nucleotide   | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            |                                |
-| mandelbrot     | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            |                                |
-| n-body         | `rustc -C opt-level=3 -C target-cpu=native -C codegen-units=1`      | Direct rustc, no Cargo         |
-| regex-redux    | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            |                                |
-| spectral-norm  | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            |                                |
+| Benchmark      | RUSTFLAGS / command                                                   | Notes                                          |
+|----------------|-----------------------------------------------------------------------|------------------------------------------------|
+| binary-trees   | `-C opt-level=3 -C target-cpu=ivybridge -C codegen-units=1`         | `bumpalo`, `rayon` crates                      |
+| fannkuch-redux | `-C opt-level=3 -C target-cpu=ivybridge -C codegen-units=1`         |                                                |
+| fasta          | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            | `num_cpus`, `spin` crates                      |
+| k-nucleotide   | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            | `futures`, `tokio-threadpool`, `hashbrown`, `itertools`, `num` crates |
+| mandelbrot     | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            | `rayon` crate                                  |
+| n-body         | `rustc -C opt-level=3 -C target-cpu=native -C codegen-units=1`      | Direct rustc, no Cargo; SIMD (AVX/SSE)        |
+| regex-redux    | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            | `rayon`, `libc`, `pcre2-sys` crates; requires `pcre2-dev pkgconf` |
+| spectral-norm  | `-C opt-level=3 -C target-cpu=native -C codegen-units=1`            | `rayon` crate; SIMD (SSE2)                     |
 
 ---
 
