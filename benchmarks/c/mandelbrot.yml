@@ -6,7 +6,7 @@ services:
   c-container:
     image: gcc:15.2.0
     setup-commands:
-      - command: gcc -O3 -march=native -fopenmp /tmp/repo/benchmarks/c/mandelbrot/main.c -o /tmp/main
+      - command: gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -mno-fma -fno-finite-math-only -fopenmp /tmp/repo/benchmarks/c/mandelbrot/main.c -o /tmp/main
     command: sleep infinity
 
 flow:

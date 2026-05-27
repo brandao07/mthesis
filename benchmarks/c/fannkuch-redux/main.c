@@ -1,173 +1,154 @@
 // The Computer Language Benchmarks Game
 // https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 //
-// Contributed by Jeremy Zerfas
-// Based on the Ada program by Jonathan Parker and Georg Bauhaus which in turn
-// was based on code by Dave Fladebo, Eckehard Berns, Heiner Marxen, Hongwei Xi,
-// and The Anh Tran and also the Java program by Oleg Mazurov.
+// Contributed by Ilya Kurdyukov
+// Based on "fannkuch-redux C++ g++ #6",
+// contributed by Andrei Simion (with patch from Vincent Yu)
+// which in turn was based on the C++ program by Dave Compton,
+// which in turn was based on the C program by Jeremy Zerfasm
+// which in turn was based on the Ada program by Jonathan Parker and 
+// Georg Bauhaus which in turn was based on code by Dave Fladebo, 
+// Eckehard Berns, Heiner Marxen, Hongwei Xi, and The Anh Tran and 
+// also the Java program by Oleg Mazurov.
 
-// This value controls how many blocks the workload is broken up into (as long
-// as the value is less than or equal to the factorial of the argument to this
-// program) in order to allow the blocks to be processed in parallel if
-// possible. PREFERRED_NUMBER_OF_BLOCKS_TO_USE should be some number which
-// divides evenly into all factorials larger than it. It should also be around
-// 2-8 times the amount of threads you want to use in order to create enough
-// blocks to more evenly distribute the workload amongst the threads.
-#define PREFERRED_NUMBER_OF_BLOCKS_TO_USE 12
-
-#include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <pthread.h>
+#include <smmintrin.h>  /* SSE 4.1 */
 
-// intptr_t should be the native integer type on most sane systems.
-typedef intptr_t intnative_t;
+#define MAX_N 16
+#define MAX_BLOCKS 24
+#define ALIGN(n) __attribute__((aligned(n)))
+#define LIKELY(x) __builtin_expect(!!(x), 1)
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+#define RAMP16 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
 
+static __m128i masks_shift[16] ALIGN(16);
+static uint64_t factorials[MAX_N + 1];
 
-int main(int argc, char ** argv){
-   const intnative_t n=atoi(argv[1]);
+struct fannkuch_data {
+  uint64_t block_start, block_size, block_end;
+  long long checksum;
+  unsigned max_flips, n, mutex;
+};
 
-   // Create and initialize factorial_Lookup_Table.
-   intnative_t factorial_Lookup_Table[n+1];
-   factorial_Lookup_Table[0]=1;
-   for(intnative_t i=0; ++i<=n;)
-      factorial_Lookup_Table[i]=i*factorial_Lookup_Table[i-1];
+static void* fannkuch_func(void* param) {
+  struct fannkuch_data *data = (struct fannkuch_data*)param;
+  long long checksum = 0;
+  unsigned max_flips = 0;
 
-   // Determine the block_Size to use. If n! is less than
-   // PREFERRED_NUMBER_OF_BLOCKS_TO_USE then just use a single block to prevent
-   // block_Size from being set to 0. This also causes smaller values of n to
-   // be computed serially which is faster and uses less resources for small
-   // values of n.
-   const intnative_t block_Size=factorial_Lookup_Table[n]/
-     (factorial_Lookup_Table[n]<PREFERRED_NUMBER_OF_BLOCKS_TO_USE ?
-     1 : PREFERRED_NUMBER_OF_BLOCKS_TO_USE);
+  int n = data->n;
+  uint64_t block_size = data->block_size;
+  uint64_t block_end = data->block_end;
 
-   intnative_t maximum_Flip_Count=0, checksum=0;
+  if (n < 1 || n > MAX_N) __builtin_unreachable();
 
-   // Iterate over each block.
-   #pragma omp parallel for \
-     reduction(max:maximum_Flip_Count) reduction(+:checksum)
-   for(intnative_t initial_Permutation_Index_For_Block=0;
-     initial_Permutation_Index_For_Block<factorial_Lookup_Table[n];
-     initial_Permutation_Index_For_Block+=block_Size){
+  // iterate over each block.
+  for (;;) {
+    uint64_t block_start = __sync_fetch_and_add(&data->block_start, block_size);
+    if (block_start >= block_end) break;
 
-      intnative_t count[n];
-      int8_t temp_Permutation[n], current_Permutation[n];
-
-
-      // Initialize count and current_Permutation.
-      count[0]=0;
-      for(intnative_t i=0; i<n; ++i)
-         current_Permutation[i]=i;
-      for(intnative_t i=n-1,
-        permutation_Index=initial_Permutation_Index_For_Block; i>0; --i){
-         const intnative_t d=permutation_Index/factorial_Lookup_Table[i];
-         permutation_Index=permutation_Index%factorial_Lookup_Table[i];
-         count[i]=d;
-
-         for(intnative_t j=0; j<n; ++j)
-            temp_Permutation[j]=current_Permutation[j];
-         for(intnative_t j=0; j<=i; ++j)
-            current_Permutation[j]= j+d<=i ?
-              temp_Permutation[j+d] : temp_Permutation[j+d-i-1];
+    __m128i ramp = _mm_setr_epi8(RAMP16), current = ramp;
+	  __m128i c0 = _mm_setzero_si128();
+		__m128i count_vec = c0;
+    unsigned i = n;
+    {  
+	    uint64_t j = block_start;
+      __m128i v0, v1, v2, mask, c1 = _mm_set1_epi8(1);
+      mask = _mm_sub_epi8(ramp, _mm_set1_epi8(i));
+      while (i--) {
+        uint64_t d = j / factorials[i];
+        j -= d * factorials[i];
+        v2 = _mm_set1_epi8(d);
+				count_vec = _mm_alignr_epi8(count_vec, v2, 15);
+        v1 = _mm_add_epi8(ramp, v2);
+        v0 = _mm_add_epi8(mask, v2);  // ramp - i + d
+        v0 = _mm_blendv_epi8(v0, v1, v0);
+        v2 = _mm_shuffle_epi8(current, v0);
+        current = _mm_blendv_epi8(current, v2, mask);
+        mask = _mm_add_epi8(mask, c1);
       }
+    }
 
+    // iterate over each permutation in the block.
+    uint64_t block_left = block_size;
 
-      // Iterate over each permutation in the block.
-      const intnative_t last_Permutation_Index_In_Block=
-        initial_Permutation_Index_For_Block+block_Size-1;
-      for(intnative_t permutation_Index=initial_Permutation_Index_For_Block; ;
-        ++permutation_Index){
-
-         // If the first value in the current_Permutation is not 1 (0) then
-         // we will need to do at least one flip for the current_Permutation.
-         if(current_Permutation[0]>0){
-
-            // Make a copy of current_Permutation[] to work on. Note that we
-            // don't need to copy the first value since that will be stored
-            // in a separate variable since it gets used a lot.
-            for(intnative_t i=0; ++i<n;)
-               temp_Permutation[i]=current_Permutation[i];
-
-            intnative_t flip_Count=1;
-
-            // Flip temp_Permutation until the element at the first_Value
-            // index is 1 (0).
-            for(intnative_t first_Value=current_Permutation[0];
-              temp_Permutation[first_Value]>0; ++flip_Count){
-
-               // Record the new_First_Value and restore the old
-               // first_Value at its new flipped position.
-               const int8_t new_First_Value=temp_Permutation[first_Value];
-               temp_Permutation[first_Value]=first_Value;
-
-               // If first_Value is greater than 3 (2) then we are flipping
-               // a series of four or more values so we will also need to
-               // flip additional elements in the middle of the
-               // temp_Permutation.
-               if(first_Value>2){
-                  intnative_t low_Index=1, high_Index=first_Value-1;
-                  // Note that this loop is written so that it will run at
-                  // most 16 times so that compilers will be more willing
-                  // to unroll it. Consequently this won't work right when
-                  // n is greater than 35. This would probably be the
-                  // least of your concerns since 21! won't fit into 64
-                  // bit integers and even if it did you probably wouldn't
-                  // want to run this program with a value that large
-                  // since it would take thousands of years to do on a
-                  // modern desktop computer. ;-)
-                  do{
-                     const int8_t temp=temp_Permutation[high_Index];
-                     temp_Permutation[high_Index]=
-                       temp_Permutation[low_Index];
-                     temp_Permutation[low_Index]=temp;
-                  }while(low_Index+++3<=high_Index-- && low_Index<16);
-               }
-
-               // Update first_Value to new_First_Value that we recorded
-               // earlier.
-               first_Value=new_First_Value;
-            }
-
-
-            // Update the checksum.
-            if(permutation_Index%2==0)
-               checksum+=flip_Count;
-            else
-               checksum-=flip_Count;
-
-            // Update maximum_Flip_Count if necessary.
-            if(flip_Count>maximum_Flip_Count)
-               maximum_Flip_Count=flip_Count;
-         }
-
-
-         // Break out of the loop when we get to the
-         // last_Permutation_Index_In_Block.
-         if(permutation_Index>=last_Permutation_Index_In_Block)
-            break;
-
-         // Generate the next permutation.
-         int8_t first_Value=current_Permutation[1];
-         current_Permutation[1]=current_Permutation[0];
-         current_Permutation[0]=first_Value;
-         for(intnative_t i=1; ++count[i]>i;){
-            count[i++]=0;
-            const int8_t new_First_Value=current_Permutation[0]=
-              current_Permutation[1];
-
-            for(intnative_t j=0; ++j<i;)
-               current_Permutation[j]=current_Permutation[j+1];
-
-            current_Permutation[i]=first_Value;
-            first_Value=new_First_Value;
-         }
+    do {
+			__m128i v0, v1, v2, v3;	unsigned i, first;
+#define X(op) \
+			v2 = current; \
+			first = _mm_cvtsi128_si32(current); \
+			v0 = _mm_sub_epi8(count_vec, ramp); \
+			i = __builtin_ctz(_mm_movemask_epi8(v0)); \
+			v0 = _mm_set1_epi8(i); \
+			v1 = _mm_andnot_si128(_mm_cmpgt_epi8(v0, ramp), count_vec); \
+			count_vec = _mm_sub_epi8(v1, _mm_cmpeq_epi8(v0, ramp)); \
+      current = _mm_shuffle_epi8(current, masks_shift[i]); \
+      if (LIKELY(first & 0xff)) { \
+        unsigned flips = 0; \
+				v3 = _mm_shuffle_epi8(v2, c0); \
+        do { \
+   				v0 = _mm_sub_epi8(v3, ramp); \
+					v3 = _mm_shuffle_epi8(v2, v3); \
+   				v0 = _mm_blendv_epi8(v0, ramp, v0); \
+          v2 = _mm_shuffle_epi8(v2, v0); \
+          first = _mm_cvtsi128_si32(v3); \
+          flips++; \
+        } while (UNLIKELY(first & 0xff)); \
+        checksum op flips; \
+        if (flips > max_flips) max_flips = flips; \
       }
-   }
+			X(+=) if (UNLIKELY(block_left == 1)) break; X(-=)
+    } while (LIKELY(block_left -= 2));
+  }
 
+  __sync_add_and_fetch(&data->checksum, checksum);
+  while (__sync_lock_test_and_set(&data->mutex, 1));
+  if (data->max_flips < max_flips) data->max_flips = max_flips;
+  __sync_lock_release(&data->mutex);
+  return NULL;
+}
 
-   // Output the results to stdout.
-   printf("%jd\nPfannkuchen(%jd) = %jd\n", (intmax_t)checksum, (intmax_t)n,
-     (intmax_t)maximum_Flip_Count);
+#define MAX_THREADS 64
 
-   return 0;
+int main(int argc, char **argv) {   
+  int i, n, nthreads = 4; uint64_t tmp = 1;
+  __m128i ramp = _mm_setr_epi8(RAMP16);
+  __m128i c1 = _mm_set1_epi8(1), v0, v1, v2;
+  __m128i ramp1 = _mm_bsrli_si128(ramp, 1), old = ramp;
+  factorials[0] = 1;
+  v0 = _mm_sub_epi8(_mm_setzero_si128(), ramp);
+  for (i = 0; i < MAX_N; v0 = _mm_add_epi8(v0, c1)) {
+    v2 = _mm_blendv_epi8(v0, ramp, v0);
+		v1 = _mm_blendv_epi8(ramp1, v2, _mm_sub_epi8(v0, c1));
+		old = _mm_shuffle_epi8(old, v1);
+    masks_shift[i] = old;
+		tmp *= ++i;
+		factorials[i] = tmp;
+  }
+
+  if (argc > 2 && !strcmp(argv[1], "-t"))
+    argc -= 2, argv += 2, nthreads = atoi(*argv);
+  if (nthreads < 1) nthreads = 1;
+  if (nthreads > MAX_THREADS) nthreads = MAX_THREADS;
+
+  while (argc-- > 1) {
+    struct fannkuch_data data = { 0 };
+    uint64_t block_end;
+    pthread_t buf[MAX_THREADS];
+
+    data.n = n = atoi(*++argv);
+    if (n < 1 || n > MAX_N) return 1;
+
+    block_end = factorials[n];
+    data.block_size = block_end / (block_end > MAX_BLOCKS ? MAX_BLOCKS : 1);
+    data.block_end = block_end;
+
+    for (i = 1; i < nthreads; i++)
+      pthread_create(buf + i, NULL, fannkuch_func, &data);
+    fannkuch_func(&data);
+    for (i = 1; i < nthreads; i++) pthread_join(buf[i], NULL);
+    printf("%lld\nPfannkuchen(%u) = %u\n", data.checksum, n, data.max_flips);
+  }
 }
