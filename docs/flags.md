@@ -29,7 +29,7 @@ All benchmarks install `libboost-dev` in `setup-commands`.
 
 | Benchmark      | Flags                                                                              | Notes                                        |
 |----------------|------------------------------------------------------------------------------------|----------------------------------------------|
-| binary-trees   | `-pipe -O3 -fomit-frame-pointer -march=native -std=gnu++17 -ltbb`                 | Requires `libtbb-dev` (uses `<execution>`)   |
+| binary-trees   | `-pipe -O3 -fomit-frame-pointer -march=native -std=gnu++17 -ltbb`                 | Requires `libtbb-dev libboost-dev` (uses `<execution>` and boost headers) |
 | fannkuch-redux | `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -fopenmp`                |                                              |
 | fasta          | `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -lpthread`               |                                              |
 | k-nucleotide   | `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -lpthread`               |                                              |
