@@ -212,6 +212,19 @@ Base flags (all benchmarks): `-dzend_extension=<opcache.so> -dopcache.enable_cli
 
 ---
 
+## Ruby
+
+Runtime: `ruby` (CLI)
+
+No compilation step. A shell wrapper is generated at setup time by `build_in_tmp.sh` that invokes `ruby` with the correct flags.
+
+Flags (all benchmarks): `--yjit -W0`
+
+- `--yjit`: enables Ruby's YJIT JIT compiler
+- `-W0`: suppresses all warnings
+
+---
+
 ## Interpreted Languages
 
 No compilation step. The runtime is invoked directly in the GMT flow.
@@ -221,5 +234,4 @@ No compilation step. The runtime is invoked directly in the GMT flow.
 | Lua      | `lua`           |
 | Perl     | `perl`          |
 | Python   | `python3`       |
-| Ruby     | `ruby`          |
 | NodeJS   | `node`          |
