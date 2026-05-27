@@ -6,7 +6,8 @@ services:
   c-container:
     image: gcc:15.2.0
     setup-commands:
-      - command: apt-get update && apt-get install -y --no-install-recommends libapr1-dev && rm -rf /var/lib/apt/lists/*
+      - shell: sh
+        command: apt-get update && apt-get install -y --no-install-recommends libapr1-dev && rm -rf /var/lib/apt/lists/*
       - command: gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp -I/usr/include/apr-1.0 /tmp/repo/benchmarks/c/binary-trees/main.c -o /tmp/binary-trees -lapr-1
       - command: gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -pthread /tmp/repo/benchmarks/c/fannkuch-redux/main.c -o /tmp/fannkuch-redux
       - command: gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native /tmp/repo/benchmarks/c/fasta/main.c -o /tmp/fasta
