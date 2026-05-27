@@ -1,158 +1,172 @@
-// The Computer Language Benchmarks Game
-// https://benchmarksgame-team.pages.debian.net/benchmarksgame/
-//
-// contributed by Flim Nik
-// small optimisations by Anthony Lloyd
+///* The Computer Language Benchmarks Game
+//   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
-using System;
-using System.Linq;
+// Contributed by Thom Kiesewetter based on C Gcc #6
+// which in turn was based C++ g++ #6" by Ilya Kurdyukov,
+// which in turn was based on the C Gcc #6 by Andrei Simion (with patch from Vincent Yu)
+// which in turn was based on the C++ program by Dave Compton,
+// which in turn was based on the C program by Jeremy Zerfasm
+// which in turn was based on the Ada program by Jonathan Parker and 
+// Georg Bauhaus which in turn was based on code by Dave Fladebo, 
+// Eckehard Berns, Heiner Marxen, Hongwei Xi, and The Anh Tran and 
+// also the Java program by Oleg Mazurov.
+//*/
+
+using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Threading;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 
-public unsafe static class FannkuchRedux
+public class Program
 {
-    static int taskCount;
-    static int[] fact, chkSums, maxFlips;
+    private const int MAX_N = 16;
+    private static readonly int[] _factorials = new int[MAX_N + 1];
+    private static int _n;
+    private static int _checksum;
+    private static byte _maxFlips;
+    private static int _blockCount;
+    private static int _blockSize;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void FirstPermutation(short* p, short* pp, int* count, int n, int idx)
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    private static void Main(string[] args)
     {
-        for (int i = 0; i < n; ++i) p[i] = (byte)i;
-        for (int i = n - 1; i > 0; --i)
+        _n = args.Length > 0 ? int.Parse(args[0]) : 12;
+
+        // Start Setup
+        var factorials = _factorials;
+        factorials[0] = 1;
+        var factN = 1;
+        for (var x = 0; x < MAX_N;)
         {
-            int d = idx / fact[i];
-            count[i] = d;
-            if (d > 0)
+            factN *= ++x;
+            factorials[x] = factN;
+        }
+
+        // End Setup
+        // Thread Setup
+        var nThreads = 4;
+        var maxBlocks = 96 / 4;
+        _blockCount = maxBlocks * nThreads;
+        _blockSize = factorials[_n] / _blockCount;
+        var threads = new Thread[nThreads];
+        for (var i = 1; i < nThreads; i++)
+            (threads[i] = new Thread(() => pfannkuchThread()) { IsBackground = true, Priority = ThreadPriority.Highest }).Start();
+        Console.Out.Write("");
+        pfannkuchThread();
+        for (var i = 1; i < threads.Length; i++)
+            threads[i].Join();
+        Console.Out.WriteLineAsync(_checksum+ "\nPfannkuchen(" + _n + ") = " + _maxFlips);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    private static void pfannkuchThread()
+    {
+        var masks_shift = new Vector128<byte>[16];
+        var c0 = Vector128<byte>.Zero;
+        var c1 = Vector128.Create((byte)1);
+        var ramp = Vector128.Create((byte)0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+        var ramp1 = Sse2.ShiftRightLogical128BitLane(ramp, 1);
+        var vX = Sse2.Subtract(c0, ramp);
+        var old = ramp;
+        for (var x = 0; x < MAX_N; x++)
+        {
+            var v2 = Sse41.BlendVariable(vX, ramp, vX);
+            var v1 = Sse41.BlendVariable(ramp1, v2, Sse2.Subtract(vX, c1));
+            old = Ssse3.Shuffle(old, v1);
+            masks_shift[x] = old;
+            vX = Sse2.Add(vX, c1);
+        }
+
+        var checksum = 0;
+        var maxFlips = 0;
+        int blockId;
+        var n = _n;
+        var factorials = _factorials;
+        var blockSize = _blockSize;
+        while ((blockId = Interlocked.Decrement(ref _blockCount)) >= 0)
+        {
+            // First permutation in block
+            var next = ramp;
+            var i = n;
+            var j = blockSize * blockId;
+            var countVector = c0;
+            var blockLeft = blockSize;
+            var mask = Sse2.Subtract(ramp, Vector128.Create((byte)i));
+            while (i-- > 0)
             {
-                idx %= fact[i];
-                for (int j = i; j >= 0; --j) pp[j] = p[j];
-                for (int j = 0; j <= i; ++j) p[j] = pp[(j + d) % (i + 1)];
+                var d = j / factorials[i];
+                j -= d * factorials[i];
+                var v2 = Vector128.Create((byte)d);
+                countVector = Ssse3.AlignRight(countVector, v2, 15);
+                var v1 = Sse2.Add(ramp, v2);
+                var v0 = Sse2.Add(mask, v2); // ramp - i + d
+                v0 = Sse41.BlendVariable(v0, v1, v0);
+                v2 = Ssse3.Shuffle(next, v0);
+                next = Sse41.BlendVariable(next, v2, mask);
+                mask = Sse2.Add(mask, c1);
             }
-        }
-    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void NextPermutation(short* p, int* count)
-    {
-        var first = p[1];
-        p[1] = p[0];
-        p[0] = first;
-        int i = 1;
-        while (++count[i] > i)
-        {
-            count[i++] = 0;
-            var next = p[1];
-            p[0] = next;
-            for (int j = 1; j < i;) p[j] = p[++j];
-            p[i] = first;
-            first = next;
-        }
-    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static void Copy(short* p, short* pp, int n)
-    {
-        var startL = (long*)p;
-        var stateL = (long*)pp;
-        var lengthL = n / 4;
-        int i = 0;
-        for (; i < lengthL; i++)
-        {
-            stateL[i] = startL[i];
-        }
-        for (i = lengthL * 4; i < n; i++)
-        {
-            pp[i] = p[i];
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static int CountFlips(short* p, short* pp, int n)
-    {
-        int flips = 1;
-        int first = *p;
-        short temp;
-        if (p[first] != 0)
-        {
-            Copy(p, pp, n);
             do
             {
-                ++flips;
-                if (first > 2)
+                var current = next;
+                var v0 = Sse2.Subtract(countVector, ramp);
+                var bits = BitOperations.TrailingZeroCount(Sse2.MoveMask(v0));
+                v0 = Vector128.Create((byte)bits);
+                var v1 = Sse2.AndNot(Sse2.CompareGreaterThan(v0.AsSByte(), ramp.AsSByte()).AsByte(), countVector);
+                countVector = Sse2.Subtract(v1, Sse2.CompareEqual(v0, ramp));
+                next = Ssse3.Shuffle(next, masks_shift[bits]);
+                var first = Sse2.ConvertToInt32(current.AsInt32());
                 {
-                    short* lo = pp + 1, hi = pp + first - 1;
-                    do
+                    var flips = 0;
+                    var v3 = Ssse3.Shuffle(current, c0);
+                    while ((first & 0xff) != 0)
                     {
-                        temp = *lo;
-                        *lo = *hi;
-                        *hi = temp;
-                    } while (++lo < --hi);
-                }
-                temp = pp[first];
-                pp[first] = (short)first;
-                first = temp;
-            } while (pp[first] != 0);
-        }
-        return flips;
-    }
+                        v0 = Sse2.Subtract(v3, ramp);
+                        v3 = Ssse3.Shuffle(current, v3);
+                        v0 = Sse41.BlendVariable(v0, ramp, v0);
+                        current = Ssse3.Shuffle(current, v0);
+                        flips++;
+                        first = Sse2.ConvertToInt32(v3.AsInt32());
+                    }
 
-    static void Run(int n, int taskSize)
-    {
-        int* count = stackalloc int[n];
-        int taskId, chksum = 0, maxflips = 0;
-        short* p = stackalloc short[n];
-        short* pp = stackalloc short[n];
-        while ((taskId = Interlocked.Decrement(ref taskCount)) >= 0)
-        {
-            FirstPermutation(p, pp, count, n, taskId * taskSize);
-            if (*p != 0)
-            {
-                var flips = CountFlips(p, pp, n);
-                chksum += flips;
-                if (flips > maxflips) maxflips = flips;
-            }
-            for (int i = 1; i < taskSize; i++)
-            {
-                NextPermutation(p, count);
-                if (*p != 0)
+                    checksum += flips;
+                    if (flips > maxFlips) maxFlips = flips;
+                }
+
+                --blockLeft;
+                if (blockLeft == 0) break;
+                current = next;
+                v0 = Sse2.Subtract(countVector, ramp);
+                bits = (byte)BitOperations.TrailingZeroCount(Sse2.MoveMask(v0));
+                v0 = Vector128.Create((byte)bits);
+                v1 = Sse2.AndNot(Sse2.CompareGreaterThan(v0.AsSByte(), ramp.AsSByte()).AsByte(), countVector);
+                countVector = Sse2.Subtract(v1, Sse2.CompareEqual(v0, ramp));
+                next = Ssse3.Shuffle(next, masks_shift[bits]);
+                first = Sse2.ConvertToInt32(current.AsInt32());
                 {
-                    var flips = CountFlips(p, pp, n);
-                    chksum += (1 - (i & 1) * 2) * flips;
-                    if (flips > maxflips) maxflips = flips;
+                    var flips = 0;
+                    var v3 = Ssse3.Shuffle(current, c0);
+                    while ((first & 0xff) != 0)
+                    {
+                        v0 = Sse2.Subtract(v3, ramp);
+                        v3 = Ssse3.Shuffle(current, v3);
+                        v0 = Sse41.BlendVariable(v0, ramp, v0);
+                        current = Ssse3.Shuffle(current, v0);
+                        flips++;
+                        first = Sse2.ConvertToInt32(v3.AsInt32());
+                    }
+
+                    checksum -= flips;
+                    if (flips > maxFlips) maxFlips = flips;
                 }
-            }
-        }
-        chkSums[-taskId - 1] = chksum;
-        maxFlips[-taskId - 1] = maxflips;
-    }
 
-    public static void Main(string[] args)
-    {
-        int n = args.Length > 0 ? int.Parse(args[0]) : 7;
-        fact = new int[n + 1];
-        fact[0] = 1;
-
-        for (int i = 1; i < fact.Length; i++)
-        {
-            fact[i] = fact[i - 1] * i;
+                --blockLeft;
+            } while (blockLeft != 0);
         }
 
-        var PC = Environment.ProcessorCount;
-        taskCount = n > 11 ? fact[n] / (9 * 8 * 7 * 6 * 5 * 4 * 3 * 2) : PC;
-        int taskSize = fact[n] / taskCount;
-        chkSums = new int[PC];
-        maxFlips = new int[PC];
-        var threads = new Thread[PC];
-        for (int i = 1; i < PC; i++)
-        {
-            (threads[i] = new Thread(() => Run(n, taskSize))).Start();
-        }
-        Run(n, taskSize);
-
-        for (int i = 1; i < threads.Length; i++)
-        {
-            threads[i].Join();
-        }
-        Console.WriteLine(chkSums.Sum() + "\nPfannkuchen(" + n + ") = " + maxFlips.Max());
+        Interlocked.Add(ref _checksum, checksum);
+        if (maxFlips > _maxFlips) _maxFlips = (byte)maxFlips;
+        if (maxFlips > _maxFlips) _maxFlips = (byte)maxFlips;
     }
 }

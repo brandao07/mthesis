@@ -1,83 +1,91 @@
-/* The Computer Language Benchmarks Game
-   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+//
+// direct transliteration of Greg Buchholz's C program
+// contributed by Isaac Gouy, fix by David Turnbull
+// dispatching to multiple cores, use SIMD operationn, early break
+// depending on previous depth by Patrick Stein,
+// direct transliteration of Swift #7 program by Arseniy Zlobintsev
 
-   started with Java #2 program (Krause/Whipkey/Bennet/AhnTran/Enotus/Stalcup)
-   adapted for C# by Jan de Vaan
-   simplified and optimised to use TPL by Anthony Lloyd
-   optimized to use Vector<double> by Tanner Gooding
-   small optimisations by Anthony Lloyd
-   modified by Grigory Perepechko
-*/
-
-using System;
-using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+using System.Runtime.Intrinsics;
 
-public class MandelBrot
-{
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static unsafe byte GetByte(double* pCrb, double Ciby)
-    {
-        var res = 0;
-        for (var i=0; i<8; i+=2)
-        {
-            var vCrbx = Unsafe.Read<Vector<double>>(pCrb+i);
-            var vCiby = new Vector<double>(Ciby);
-            var Zr = vCrbx;
-            var Zi = vCiby;
-            int b = 0, j = 49;
-            do
-            {
-                for (int counter = 0; counter < 7; counter++)
-                {
-                    var nZr = Zr * Zr - Zi * Zi + vCrbx;
-                    var ZrZi = Zr * Zi;
-                    Zi = ZrZi + ZrZi + vCiby;
-                    Zr = nZr;
-                    j--;
-                }
+const int iterations = 50;
+const double depth = 4.0;
 
-                var t = Zr * Zr + Zi * Zi;
-                if (t[0]>4.0) { b|=2; if (b==3) break; }
-                if (t[1]>4.0) { b|=1; if (b==3) break; }
-            } while (j>0);
-            res = (res << 2) + b;
-        }
-        return (byte)(res^-1);
+var width = int.Parse(args[0]);
+var height = width;
+var startPoint = (x: -1.5, i: -1.0);
+var endPoint = (x: 0.5, i: 1.0);
+
+var lineCount = height;
+var lineSize = (width + 7) / 8;
+var pixelHeight = Math.Abs(endPoint.x - startPoint.x) / height;
+var pixelWidth = Math.Abs(endPoint.i - startPoint.i) / width;
+var pixelWidth8 = pixelWidth * 8.0;
+
+var outputSize = lineCount * lineSize;
+var pixelBuffer = new byte[outputSize];
+var Ci0 = startPoint.i;
+var Cr0 = (Vector512.Create((double)0, 1, 2, 3, 4, 5, 6, 7)
+    * pixelWidth)
+    + Vector512.Create(startPoint.x);
+
+var Cr0Array = new Vector512<double>[lineSize];
+
+Parallel.For(0, lineSize, x => {
+    Cr0Array[x] = Cr0 + Vector512.Create(x * pixelWidth8);
+});
+
+Parallel.For(0, lineCount, y => {
+    var slice = pixelBuffer.AsSpan(y * lineSize, lineSize);
+    var Ci = Ci0 + (y * pixelHeight);
+    var pixel = (byte)0;
+
+    for (var x = 0; x < slice.Length; x++) {
+        Mandelbrot(Cr0Array[x], Ci, ref pixel);
+        slice[x] = pixel;
     }
-    public static unsafe void Main(string[] args)
-    {
-        var size = args.Length==0 ? 200 : int.Parse(args[0]);
-        Console.Out.WriteAsync(String.Concat("P4\n",size," ",size,"\n"));
-        var Crb = new double[size+2];
-        var lineLength = size >> 3;
-        var data = new byte[size * lineLength];
-        fixed (double* pCrb = &Crb[0])
-        fixed (byte* pdata = &data[0])
-        {
-            var value = new Vector<double>(
-                  new double[] {0,1,0,0,0,0,0,0}
-            );
-            var invN = new Vector<double>(2.0/size);
-            var onePtFive = new Vector<double>(1.5);
-            var step = new Vector<double>(2);
-            for (var i=0; i<size; i+=2)
-            {
-                Unsafe.Write(pCrb+i, value*invN-onePtFive);
-                value += step;
+});
+
+Console.WriteLine($"P4\n{width} {height}");
+Console.OpenStandardOutput().Write(pixelBuffer);
+
+[MethodImpl(MethodImplOptions.AggressiveInlining)]
+static void Mandelbrot(Vector512<double> Cr, double Ci, ref byte pixel) {
+    var Zr = Vector512<double>.Zero;
+    var Zi = Vector512<double>.Zero;
+    var Tr = Vector512<double>.Zero;
+    var Ti = Vector512<double>.Zero;
+    var CiV = Vector512.Create(Ci);
+
+    var thresholds = Vector512.Create(depth);
+    var ramp = Vector512.Create(128, 64, 32, 16, 8, 4, 2, 1);
+
+    if (pixel is 0) {
+        for (var i = 0; i < iterations / 5; i++) {
+            for (var j = 0; j < 5; j++) {
+                Zi = 2.0 * Zr * Zi + CiV;
+                Zr = Tr - Ti + Cr;
+                Tr = Zr * Zr;
+                Ti = Zi * Zi;
             }
-            var _Crb = pCrb;
-            var _pdata = pdata;
-            Parallel.For(0, size, y =>
-            {
-                var Ciby = _Crb[y]+0.5;
-                for (var x=0; x<lineLength; x++)
-                {
-                    _pdata[y*lineLength+x] = GetByte(_Crb+x*8, Ciby);
-                }
-            });
-            Console.OpenStandardOutput().Write(data, 0, data.Length);
+
+            var result = Vector512.LessThanAny(Tr + Ti, thresholds);
+            if (result is false) return;
         }
     }
+    else {
+        for (var i = 0; i < iterations; i++) {
+            Zi = 2.0 * Zr * Zi + CiV;
+            Zr = Tr - Ti + Cr;
+            Tr = Zr * Zr;
+            Ti = Zi * Zi;
+        }
+    }
+
+    var cmpresult = Vector512.LessThan(Tr + Ti, thresholds);
+    var summask = ramp & cmpresult.AsInt64();
+
+    pixel = (byte)Vector512.Sum(summask);
 }
