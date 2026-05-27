@@ -201,7 +201,7 @@ Base flags (all benchmarks): `-dzend_extension=<opcache.so> -dopcache.enable_cli
 
 | Benchmark      | Extra flags                  | Notes                                              |
 |----------------|------------------------------|----------------------------------------------------|
-| binary-trees   | `-d memory_limit=4096M`      |                                                    |
+| binary-trees   | `-d memory_limit=4096M`      | Also loads `shmop`, `pcntl` extensions             |
 | fannkuch-redux |                              |                                                    |
 | fasta          |                              |                                                    |
 | k-nucleotide   | `-d memory_limit=1024M`      | Also loads `pcntl`, `sysvmsg` extensions           |

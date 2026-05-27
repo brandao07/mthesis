@@ -21,12 +21,21 @@ elif [ -n "$EXT_DIR" ] && [ -f "$EXT_DIR/opcache.so" ]; then
   OPCACHE_SO="$EXT_DIR/opcache.so"
 fi
 
+SHMOP_ARG="-dextension=shmop"
+PCNTL_ARG="-dextension=pcntl"
+if [ -n "$EXT_DIR" ] && [ -f "$EXT_DIR/shmop.so" ]; then
+  SHMOP_ARG="-dextension=$EXT_DIR/shmop.so"
+fi
+if [ -n "$EXT_DIR" ] && [ -f "$EXT_DIR/pcntl.so" ]; then
+  PCNTL_ARG="-dextension=$EXT_DIR/pcntl.so"
+fi
+
 cat > "$BIN" <<EOF
 #!/bin/sh
 if [ -n "$OPCACHE_SO" ]; then
-  exec "$PHP_BIN" -dzend_extension="$OPCACHE_SO" -dopcache.enable_cli=1 -dopcache.jit_buffer_size=64M -n -d memory_limit=4096M "$SRC_PHP" "\$@"
+  exec "$PHP_BIN" -dzend_extension="$OPCACHE_SO" -dopcache.enable_cli=1 -dopcache.jit_buffer_size=64M -n $SHMOP_ARG $PCNTL_ARG -d memory_limit=4096M "$SRC_PHP" "\$@"
 else
-  exec "$PHP_BIN" -n -d memory_limit=4096M "$SRC_PHP" "\$@"
+  exec "$PHP_BIN" -n $SHMOP_ARG $PCNTL_ARG -d memory_limit=4096M "$SRC_PHP" "\$@"
 fi
 EOF
 
