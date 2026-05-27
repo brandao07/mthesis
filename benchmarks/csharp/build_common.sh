@@ -63,6 +63,17 @@ EOF
 
   cat <<'EOF'
   </PropertyGroup>
+EOF
+
+  if [ "$BENCH" = "k-nucleotide" ]; then
+    cat <<'EOF'
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Experimental.Collections" Version="1.0.6-e190117-3" />
+  </ItemGroup>
+EOF
+  fi
+
+  cat <<'EOF'
 </Project>
 EOF
 } > "$PROJECT_FILE"
