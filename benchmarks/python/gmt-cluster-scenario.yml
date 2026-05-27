@@ -1,10 +1,10 @@
 name: Python Benchmark (All - Cluster Scenario)
 author: André Brandão <https://github.com/brandao07>
-description: Python benchmarks using Python 3.13 Alpine — all 8 benchmarks combined
+description: Python benchmarks using Python 3.13 Slim — all 8 benchmarks combined
 
 services:
   python-container:
-    image: python:3.13-alpine3.22
+    image: python:3.13-slim
     command: sleep infinity
 
 flow:
