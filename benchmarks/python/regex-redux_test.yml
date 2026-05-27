@@ -6,7 +6,8 @@ services:
   python-container:
     image: python:3.13-slim
     setup-commands:
-      - command: apt-get update && apt-get install -y --no-install-recommends libpcre2-8-0 && rm -rf /var/lib/apt/lists/*
+      - shell: sh
+        command: apt-get update && apt-get install -y --no-install-recommends libpcre2-8-0 && rm -rf /var/lib/apt/lists/*
     command: sleep infinity
 
 flow:
