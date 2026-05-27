@@ -81,12 +81,16 @@ DOTNET_NOLOGO=1 \
 NUGET_PACKAGES=/tmp/nuget-packages \
 dotnet build -r "$RID" -c Release "$PROJECT_FILE"
 
-BIN="$BUILD_DIR/bin/Release/net9.0/$RID/program"
+DLL="$BUILD_DIR/bin/Release/net9.0/$RID/program.dll"
 
-if [ ! -f "$BIN" ]; then
-  echo "[ERROR] Build output not found '$BIN'" >&2
+if [ ! -f "$DLL" ]; then
+  echo "[ERROR] Build output not found '$DLL'" >&2
   exit 4
 fi
 
-cp "$BIN" "$OUT_BIN"
+cat > "$OUT_BIN" <<EOF
+#!/bin/sh
+exec dotnet "$DLL" "\$@"
+EOF
+
 chmod +x "$OUT_BIN"
