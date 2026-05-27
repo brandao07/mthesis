@@ -9,11 +9,12 @@ cp /tmp/repo/benchmarks/ocaml/spectral-norm/main.ml "$SRC_ML"
 opam exec -- ocamlopt \
   -noassert \
   -unsafe \
+  -fPIC \
   -nodynlink \
   -inline 100 \
   -O3 \
-  -ccopt -fPIC \
-  -ccopt -march=ivybridge \
+  -I +unix unix.cmxa \
+  -ccopt -march=native \
   "$SRC_ML" \
   -o "$BIN"
 

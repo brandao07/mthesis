@@ -107,15 +107,18 @@ Runtime flags: `+RTS -N4` (4 threads) on all benchmarks; some add heap/stack lim
 
 Compiler: `ocamlopt` (via `opam exec`); regex-redux uses `ocamlfind ocamlopt`
 
-Flags (all benchmarks): `-noassert -unsafe -nodynlink -inline 100 -O3 -ccopt -fPIC -ccopt -march=ivybridge`
+Flags (all benchmarks): `-noassert -unsafe -fPIC -nodynlink -inline 100 -O3 -ccopt -march=native`
 
-> **Note:** `-march=ivybridge` should be `-march=native` — inconsistency to fix across all 8 benchmarks.
-
-| Benchmark      | Extra flags / notes                                      |
-|----------------|----------------------------------------------------------|
-| binary-trees   | `-I +unix unix.cmxa`                                    |
-| regex-redux    | Uses `ocamlfind`; links `re` or `re.pcre` package        |
-| all others     | No extra flags beyond the base set                       |
+| Benchmark      | Extra flags / notes                                                         |
+|----------------|-----------------------------------------------------------------------------|
+| binary-trees   | `-I +unix unix.cmxa`                                                        |
+| fannkuch-redux | `-I +unix unix.cmxa`                                                        |
+| fasta          | `-I +unix unix.cmxa`                                                        |
+| k-nucleotide   | `-I +unix unix.cmxa`                                                        |
+| mandelbrot     | `-I +unix unix.cmxa`                                                        |
+| n-body         | _(no `-I +unix unix.cmxa`)_                                                 |
+| regex-redux    | _(no `-I +unix unix.cmxa`)_; uses `ocamlfind`; links `re` or `re.pcre`     |
+| spectral-norm  | `-I +unix unix.cmxa`                                                        |
 
 ---
 
