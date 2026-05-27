@@ -41,22 +41,26 @@ if [ ! -x "${JEXTRACT_DIR}/bin/jextract" ]; then
     rm /tmp/jextract.tar.gz
 fi
 
-mkdir -p "$WORKDIR/Include/java"
+mkdir -p "$WORKDIR/jextract-classes"
 
-# Generate PCRE2 Java bindings using jextract (matches CLBG build command).
+# Generate PCRE2 Java bindings using jextract.
+# jextract-22 emits compiled .class files by default (no --source flag).
 "${JEXTRACT_DIR}/bin/jextract" \
     -D "PCRE2_CODE_UNIT_WIDTH=8" \
     -l pcre2-8 \
     /usr/include/pcre2.h \
     -t jextract_pcre2 \
-    --source \
-    --output "$WORKDIR/Include/java"
+    --output "$WORKDIR/jextract-classes"
+
+# Locate the system PCRE2 shared library directory (installed via libpcre2-dev).
+PCRE2_LIB_DIR="$(dirname "$(find /usr/lib /lib -name 'libpcre2-8.so*' -not -type d 2>/dev/null | head -1)")"
 
 # Copy source with the correct filename to match the public class declaration.
 cp /tmp/repo/benchmarks/java/regex-redux/Main.java "$WORKDIR"/regexredux.java
 
 cd "$WORKDIR"
-javac -d . -cp . --source-path Include/java regexredux.java
+# Compile against jextract-generated class files on the classpath.
+javac -d . -cp jextract-classes regexredux.java
 
 # Prefer G1 when available (as in Oracle GraalVM builds), fall back to serial.
 if ! native-image --silent --gc=G1 \
@@ -64,15 +68,15 @@ if ! native-image --silent --gc=G1 \
     -H:+ForeignAPISupport \
     --enable-native-access=ALL-UNNAMED \
     --features=ForeignRegistrationFeature \
-    -Djava.library.path=Include/java/jextract_pcre2 \
-    -cp . -O3 -march=native regexredux \
+    -Djava.library.path="$PCRE2_LIB_DIR" \
+    -cp ".:jextract-classes" -O3 -march=native regexredux \
     -o regexredux.graalvmaot-4.graalvmaot_run; then
   native-image --silent --gc=serial \
     -H:+UnlockExperimentalVMOptions \
     -H:+ForeignAPISupport \
     --enable-native-access=ALL-UNNAMED \
     --features=ForeignRegistrationFeature \
-    -Djava.library.path=Include/java/jextract_pcre2 \
-    -cp . -O3 -march=native regexredux \
+    -Djava.library.path="$PCRE2_LIB_DIR" \
+    -cp ".:jextract-classes" -O3 -march=native regexredux \
     -o regexredux.graalvmaot-4.graalvmaot_run
 fi
