@@ -16,6 +16,6 @@ flow:
     commands:
       - type: console
         shell: sh
-        command: /tmp/java-build/regex-redux/regexredux.graalvmaot-3.graalvmaot_run 0 < /tmp/repo/inputs/fasta-5000000.txt
+        command: /tmp/java-build/regex-redux/regexredux.graalvmaot-4.graalvmaot_run 0 < /tmp/repo/inputs/fasta-5000000.txt
 
 

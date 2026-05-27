@@ -71,12 +71,14 @@ No extra flags. The Go toolchain's default release build is used for all benchma
 
 Steps: `javac` → `native-image`
 
-`native-image` flags (all benchmarks): `-O3 -march=native`. GC preference: `--gc=G1` with fallback to `--gc=serial` if G1 is unavailable.
+`native-image` base flags: `-O3 -march=native`. GC: `--gc=G1` (with fallback to `--gc=serial`) for all benchmarks **except binary-trees**, which uses no GC flag (matches CLBG).
 
-| Benchmark      | Extra notes                                              |
-|----------------|----------------------------------------------------------|
-| k-nucleotide   | Requires `fastutil-8.3.1.jar` (downloaded at setup)     |
-| all others     | No extra dependencies                                    |
+| Benchmark      | Extra native-image flags                                                                                                                                                          | Extra notes                                                                                              |
+|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| binary-trees   | _(none — no `--gc` flag per CLBG)_                                                                                                                                               |                                                                                                          |
+| k-nucleotide   |                                                                                                                                                                                   | Requires `fastutil-8.3.1.jar` (downloaded at setup)                                                     |
+| regex-redux    | `-H:+UnlockExperimentalVMOptions -H:+ForeignAPISupport --enable-native-access=ALL-UNNAMED --features=ForeignRegistrationFeature -Djava.library.path=Include/java/jextract_pcre2` | `build_in_tmp.sh` downloads jextract-22 (build 6-47), installs `libpcre2-dev`/`pcre2-devel`, generates `jextract_pcre2` bindings, then compiles |
+| all others     |                                                                                                                                                                                   |                                                                                                          |
 
 ---
 
