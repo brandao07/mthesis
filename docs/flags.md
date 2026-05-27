@@ -31,7 +31,7 @@ All benchmarks install `libboost-dev` in `setup-commands`.
 |----------------|------------------------------------------------------------------------------------|----------------------------------------------|
 | binary-trees   | `-pipe -O3 -fomit-frame-pointer -march=native -std=gnu++17 -ltbb`                 | Requires `libtbb-dev libboost-dev` (uses `<execution>` and boost headers) |
 | fannkuch-redux | `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -fopenmp`                |                                              |
-| fasta          | `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -lpthread`               |                                              |
+| fasta          | `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -lpthread`               | Requires `libboost-dev` (uses boost range headers) |
 | k-nucleotide   | `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -lpthread`               |                                              |
 | mandelbrot     | `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -mno-fma -pthread`       | Uses `<thread>`, not OpenMP                  |
 | n-body         | `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17`                         |                                              |
