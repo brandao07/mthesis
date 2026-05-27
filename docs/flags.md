@@ -142,10 +142,10 @@ Build system: `dotnet build` (JIT; no AOT)
 
 All benchmarks share `build_common.sh` which generates a `.fsproj` and builds with:
 
-- `Optimize=true`
-- `DebugSymbols=false`, `DebugType=none`
+- `PublishAot=false`, `ImplicitUsings=enable`, `Nullable=enable`, `AllowUnsafeBlocks=true`
+- `ServerGarbageCollection=true`, `ConcurrentGarbageCollection=true`
 - Target framework: `net9.0`
-- Runtime: JIT via `dotnet` wrapper script (not self-contained native binary)
+- Output: native `program` binary (self-contained launcher, runs directly)
 
 | Benchmark      | Extra project settings                                                     |
 |----------------|----------------------------------------------------------------------------|

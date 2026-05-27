@@ -51,12 +51,12 @@ cp "$SRC_FS" "$BUILD_DIR/Program.fs"
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <RuntimeIdentifier>$RID</RuntimeIdentifier>
-    <UseAppHost>true</UseAppHost>
-    <Optimize>true</Optimize>
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>none</DebugType>
-    <Deterministic>false</Deterministic>
-    <ImplicitUsings>false</ImplicitUsings>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <PublishAot>false</PublishAot>
   </PropertyGroup>
 EOF
 
@@ -81,16 +81,12 @@ DOTNET_NOLOGO=1 \
 NUGET_PACKAGES=/tmp/nuget-packages \
 dotnet build -r "$RID" -c Release "$PROJECT_FILE"
 
-DLL="$BUILD_DIR/bin/Release/net9.0/$RID/program.dll"
+BIN="$BUILD_DIR/bin/Release/net9.0/$RID/program"
 
-if [ ! -f "$DLL" ]; then
-  echo "[ERROR] Build output not found '$DLL'" >&2
+if [ ! -f "$BIN" ]; then
+  echo "[ERROR] Build output not found '$BIN'" >&2
   exit 4
 fi
 
-cat > "$OUT_BIN" <<EOF
-#!/bin/sh
-exec dotnet "$DLL" "\$@"
-EOF
-
+cp "$BIN" "$OUT_BIN"
 chmod +x "$OUT_BIN"
