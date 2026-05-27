@@ -130,10 +130,7 @@ All benchmarks share `build_common.sh` which generates a `.csproj` and publishes
 - Target framework: `net9.0`
 - `AllowUnsafeBlocks=true`
 
-| Benchmark      | Extra project settings                                   |
-|----------------|----------------------------------------------------------|
-| mandelbrot     | `CheckForOverflowUnderflow=false`                        |
-| all others     | No extra settings                                        |
+All benchmarks use identical project settings — no per-benchmark overrides.
 
 Requires `clang` and `zlib1g-dev` (installed by `setup_dependencies.sh`).
 

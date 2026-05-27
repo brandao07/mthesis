@@ -61,12 +61,6 @@ cp "$SRC_CS" "$BUILD_DIR/Program.cs"
     <IlcInstructionSet>native</IlcInstructionSet>
 EOF
 
-  if [ "$BENCH" = "mandelbrot" ]; then
-    cat <<'EOF'
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-EOF
-  fi
-
   cat <<'EOF'
   </PropertyGroup>
 </Project>
