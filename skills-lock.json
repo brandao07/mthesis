@@ -4,42 +4,56 @@
     "bubbletea": {
       "source": "ggprompts/tfe",
       "sourceType": "github",
+      "skillPath": ".claude/skills/bubbletea/SKILL.md",
       "computedHash": "a06df850cbd8282da9c362bd5585150119c87032bb07417a141b71b6f0b966ba"
     },
     "clean-code": {
       "source": "sickn33/antigravity-awesome-skills",
       "sourceType": "github",
-      "computedHash": "14ba8e7d8477723eca6d48a79a1924337f4a1f5f1c7ab9b0a7acc073268ecd5a"
+      "skillPath": "skills/clean-code/SKILL.md",
+      "computedHash": "74bf6ded4f61ddcb593e7a29beb96c284f888cbe0639ad6e23710447c36ff19a"
     },
     "conventional-commits": {
       "source": "patricio0312rev/skills",
       "sourceType": "github",
+      "skillPath": "foundation/conventional-commits/SKILL.md",
       "computedHash": "1a9b826315006b8bf32126c8391f7f11e8ed090b8506f029ccca165cb4f438dc"
     },
     "excalidraw-diagram": {
       "source": "coleam00/excalidraw-diagram-skill",
       "sourceType": "github",
+      "skillPath": "SKILL.md",
       "computedHash": "fc91249969c7c1adc1f810ddfe10f18e206b78609467bb4955248e9138932e8a"
     },
     "go-cobra": {
       "source": "aaronflorey/agent-skills",
       "sourceType": "github",
-      "computedHash": "688abbf5efa25bd206d5855d90d02d07498934bb3f60707cfcdcebc549fe97c3"
+      "skillPath": "skills/go-cobra/SKILL.md",
+      "computedHash": "21975ee46d1764d21288b79ec2dd26f19e163919c3f3e963bf8eedda38bdc663"
     },
     "golang": {
       "source": "saisudhir14/golang-agent-skill",
       "sourceType": "github",
+      "skillPath": "SKILL.md",
       "computedHash": "015c18f1fdacd779cdd5fa2795e3e088ef57f7a0dc7a5ebe9bb67245b29f8800"
     },
     "software-architecture": {
       "source": "sickn33/antigravity-awesome-skills",
       "sourceType": "github",
-      "computedHash": "de98595ceee4cf6e97dc88a80f8693a614c10e70170562b692531a60e655d57d"
+      "skillPath": "skills/software-architecture/SKILL.md",
+      "computedHash": "19ee028010077ff687e3fcf9613b4f9b9d6c839a15396007d9ba263f6930ec6a"
+    },
+    "subagent-driven-development": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/subagent-driven-development/SKILL.md",
+      "computedHash": "b38be2f3a092d758127f6d47e77c2493885aebf38aae359e4c786df2c343b837"
     },
     "testing-patterns": {
       "source": "sickn33/antigravity-awesome-skills",
       "sourceType": "github",
-      "computedHash": "a026d53c9111e0861cee7f1a2ea19fa1896a2eb4fd093b51b7dcb6338e7f64c7"
+      "skillPath": "skills/testing-patterns/SKILL.md",
+      "computedHash": "028a768cc83e90ef6dcd96bc067dcc5d271eaca44d4f86ecf28bf39e5e32b8a6"
     }
   }
 }

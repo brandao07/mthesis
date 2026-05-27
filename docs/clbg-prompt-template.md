@@ -1,8 +1,8 @@
 From CLBG (source, what i have needs to match this):
 
+# Binary Trees
+
 ```
-Binary Trees
-
 NOTES:
 <notes>
 
@@ -11,9 +11,11 @@ MAKE:
 
 COMMAND LINE:
 <command>
+```
 
-Fannkuch
+# Fannkuch
 
+```
 NOTES:
 <notes>
 
@@ -22,9 +24,11 @@ MAKE:
 
 COMMAND LINE:
 <command>
+```
 
-n-body
+# Fasta
 
+```
 NOTES:
 <notes>
 
@@ -33,9 +37,11 @@ MAKE:
 
 COMMAND LINE:
 <command>
+```
 
-Spectral-Norm
+# K-Nucleotide
 
+```
 NOTES:
 <notes>
 
@@ -44,9 +50,11 @@ MAKE:
 
 COMMAND LINE:
 <command>
+```
 
-Mandelbrot
+# Mandelbrot
 
+```
 NOTES:
 <notes>
 
@@ -55,9 +63,11 @@ MAKE:
 
 COMMAND LINE:
 <command>
+```
 
-Fasta
+# N-Body
 
+```
 NOTES:
 <notes>
 
@@ -66,9 +76,11 @@ MAKE:
 
 COMMAND LINE:
 <command>
+```
 
-k-nucleotide
+# Regex-Redux
 
+```
 NOTES:
 <notes>
 
@@ -77,9 +89,11 @@ MAKE:
 
 COMMAND LINE:
 <command>
+```
 
-Regex-Redux
+# Spectral-Norm
 
+```
 NOTES:
 <notes>
 
