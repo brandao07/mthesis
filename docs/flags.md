@@ -98,7 +98,7 @@ Runtime flags: `+RTS -N4` (4 threads) on all benchmarks; some add heap/stack lim
 | k-nucleotide   | `-funbox-strict-fields -XScopedTypeVariables -package hashable -package unordered-containers -package pvar -package ghc-compact` | `-K2048M`       | Requires `parallel`, `hashable`, `hashtables`, `containers`, `bytestring`, `unordered-containers`, `pvar` (cabal) |
 | mandelbrot     | `-XMagicHash -XUnboxedTuples`                                                                                                |                     |                                                                                       |
 | n-body         | (base only)                                                                                                                  |                     |                                                                                       |
-| regex-redux    | `-XForeignFunctionInterface -XCApiFFI -optc "-DPCRE2_CODE_UNIT_WIDTH=8" -lpcre2-8`                                          | `-H250M`            | Requires `libpcre2-dev` (bundled in LLVM install step)                                |
+| regex-redux    | `-XForeignFunctionInterface -XCApiFFI -optc "-DPCRE2_CODE_UNIT_WIDTH=8" -lpcre2-8`                                          | `-H250M`            | Requires `libpcre2-dev` (bundled in LLVM install step); `vector` (cabal)              |
 | spectral-norm  | `-XMagicHash`                                                                                                                |                     |                                                                                       |
 
 ---
