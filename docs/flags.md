@@ -86,20 +86,20 @@ Steps: `javac` → `native-image`
 
 Compiler: `ghc`
 
-Base flags for most benchmarks: `-O2 -XBangPatterns -threaded -rtsopts -XMagicHash`
+All benchmarks use `-fllvm` (LLVM backend) and install LLVM/Clang via a version-probing apt script (tries llvm-15, 14, 13). Base flags: `-O2 -XBangPatterns -fllvm -threaded -rtsopts`.
 
 Runtime flags: `+RTS -N4` (4 threads) on all benchmarks; some add heap/stack limits.
 
-| Benchmark      | Extra compile flags                                                          | Extra runtime flags  | Notes                              |
-|----------------|------------------------------------------------------------------------------|----------------------|------------------------------------|
-| binary-trees   | (base)                                                                        | `-K128M -H`          | Requires `parallel`, `ghc-compact` |
-| fannkuch-redux | (base)                                                                        |                      |                                    |
-| fasta          | (base)                                                                        |                      | Requires `massiv`                  |
-| k-nucleotide   | (base)                                                                        | `-K2048M`            | Requires `parallel`, `hashable`, `hashtables`, `containers`, `bytestring` |
-| mandelbrot     | `-fllvm -XUnboxedTuples`                                                     |                      | Requires LLVM (`llvm-*`, `clang-*`) installed at setup |
-| n-body         | (base)                                                                        |                      |                                    |
-| regex-redux    | `-XForeignFunctionInterface -XCApiFFI -optc "-DPCRE2_CODE_UNIT_WIDTH=8" -lpcre2-8` | `-H250M`       | Requires `libpcre2-dev`, `vector`  |
-| spectral-norm  | (base)                                                                        |                      |                                    |
+| Benchmark      | Extra compile flags                                                                                                          | Extra runtime flags | Notes                                                                                 |
+|----------------|------------------------------------------------------------------------------------------------------------------------------|---------------------|---------------------------------------------------------------------------------------|
+| binary-trees   | `-fno-cse -package ghc-compact`                                                                                             | `-K128M -H`         | Requires `parallel` (cabal); `ghc-compact` is bundled with GHC                       |
+| fannkuch-redux | `-XScopedTypeVariables`                                                                                                      |                     |                                                                                       |
+| fasta          | `-XStrict`                                                                                                                   |                     |                                                                                       |
+| k-nucleotide   | `-funbox-strict-fields -XScopedTypeVariables -package hashable -package unordered-containers -package pvar -package ghc-compact` | `-K2048M`       | Requires `hashable`, `unordered-containers`, `pvar` (cabal)                           |
+| mandelbrot     | `-XMagicHash -XUnboxedTuples`                                                                                                |                     |                                                                                       |
+| n-body         | (base only)                                                                                                                  |                     |                                                                                       |
+| regex-redux    | `-XForeignFunctionInterface -XCApiFFI -optc "-DPCRE2_CODE_UNIT_WIDTH=8" -lpcre2-8`                                          | `-H250M`            | Requires `libpcre2-dev` (bundled in LLVM install step)                                |
+| spectral-norm  | `-XMagicHash`                                                                                                                |                     |                                                                                       |
 
 ---
 

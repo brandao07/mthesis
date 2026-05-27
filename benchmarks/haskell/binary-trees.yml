@@ -8,6 +8,8 @@ services:
     setup-commands:
       - shell: bash
         command: apt-get update && for version in 15 14 13; do if apt-cache show "llvm-${version}" "clang-${version}" >/dev/null 2>&1; then apt-get install -y --no-install-recommends "llvm-${version}" "clang-${version}" libpcre2-dev && ln -sf "/usr/bin/opt-${version}" /usr/local/bin/opt && ln -sf "/usr/bin/llc-${version}" /usr/local/bin/llc && ln -sf "/usr/bin/clang-${version}" /usr/local/bin/clang && break; fi; done && test -x /usr/local/bin/opt && test -x /usr/local/bin/llc && test -x /usr/local/bin/clang && rm -rf /var/lib/apt/lists/*
+      - shell: bash
+        command: cabal update && cabal install --lib parallel
       - shell: sh
         command: mkdir -p /tmp/haskell-binary-trees && ghc -O2 -XBangPatterns -fllvm -fno-cse -package ghc-compact -threaded -rtsopts /tmp/repo/benchmarks/haskell/binary-trees/main.hs -outputdir /tmp/haskell-binary-trees -odir /tmp/haskell-binary-trees -hidir /tmp/haskell-binary-trees -o /tmp/haskell-binary-trees/main
     command: sleep infinity
