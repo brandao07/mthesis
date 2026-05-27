@@ -34,9 +34,9 @@ fi
 cat > "$BIN" <<EOF
 #!/bin/sh
 if [ -n "$OPCACHE_SO" ]; then
-  exec "$PHP_BIN" -dzend_extension="$OPCACHE_SO" -dopcache.enable_cli=1 -dopcache.jit_buffer_size=64M -n $SHMOP_ARG $PCNTL_ARG -d memory_limit=4096M "$SRC_PHP" "\$@"
+  exec "$PHP_BIN" -dzend_extension="$OPCACHE_SO" -dopcache.enable_cli=1 -dopcache.jit_buffer_size=64M -n $SHMOP_ARG $PCNTL_ARG "$SRC_PHP" "\$@"
 else
-  exec "$PHP_BIN" -n $SHMOP_ARG $PCNTL_ARG -d memory_limit=4096M "$SRC_PHP" "\$@"
+  exec "$PHP_BIN" -n $SHMOP_ARG $PCNTL_ARG "$SRC_PHP" "\$@"
 fi
 EOF
 

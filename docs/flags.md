@@ -186,6 +186,32 @@ No extra compiler flags. Runtime invocation uses `erl -smp enable` to enable SMP
 
 ---
 
+## PHP
+
+Runtime: `php` (CLI)
+
+No compilation step. A shell wrapper is generated at setup time by `build_in_tmp.sh` that invokes `php` with the correct flags.
+
+Base flags (all benchmarks): `-dzend_extension=<opcache.so> -dopcache.enable_cli=1 -dopcache.jit_buffer_size=64M -n`
+
+- `-dzend_extension=<opcache.so>`: loads OPcache (path resolved at setup time via `extension_dir`)
+- `-dopcache.enable_cli=1`: enables OPcache for CLI scripts
+- `-dopcache.jit_buffer_size=64M`: allocates JIT buffer and enables JIT compilation
+- `-n`: ignore `php.ini`; all extensions must be loaded explicitly
+
+| Benchmark      | Extra flags                  | Notes                                              |
+|----------------|------------------------------|----------------------------------------------------|
+| binary-trees   | `-d memory_limit=4096M`      |                                                    |
+| fannkuch-redux |                              |                                                    |
+| fasta          |                              |                                                    |
+| k-nucleotide   | `-d memory_limit=1024M`      | Also loads `pcntl`, `sysvmsg` extensions           |
+| mandelbrot     |                              | Also loads `shmop`, `pcntl` extensions             |
+| n-body         |                              |                                                    |
+| regex-redux    | `-d memory_limit=512M`       | Also loads `pcntl`, `sysvmsg` extensions           |
+| spectral-norm  |                              | Also loads `pcntl` extension                       |
+
+---
+
 ## Interpreted Languages
 
 No compilation step. The runtime is invoked directly in the GMT flow.
@@ -194,7 +220,6 @@ No compilation step. The runtime is invoked directly in the GMT flow.
 |----------|-----------------|
 | Lua      | `lua`           |
 | Perl     | `perl`          |
-| PHP      | `php`           |
 | Python   | `python3`       |
 | Ruby     | `ruby`          |
 | NodeJS   | `node`          |
