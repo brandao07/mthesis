@@ -2,36 +2,36 @@
 
 ## C ✅
 
-- [binary-trees](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-gcc-5.html)
-- [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-gcc-5.html)
+- [binary-trees](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-gcc-2.html)
+- [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-gcc-6.html)
 - [fasta](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fasta-gcc-3.html)
 - [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-gcc-1.html)
-- [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-gcc-5.html)
-- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-gcc-6.html)
+- [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-gcc-6.html)
+- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-gcc-9.html)
 - [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-gcc-5.html)
-- [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-gcc-3.html)
+- [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-gcc-6.html)
 
 ## C++ ✅
 
 - [binary-trees](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-gpp-7.html)
-- [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-gpp-5.html)
-- [fasta](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fasta-gpp-7.html)
+- [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-gpp-6.html)
+- [fasta](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fasta-gpp-9.html)
 - [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-gpp-2.html)
 - [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-gpp-4.html)
-- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-gpp-9.html)
+- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-gpp-0.html)
 - [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-gpp-6.html)
-- [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-gpp-7.html)
+- [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-gpp-6.html)
 
-## C#
+## C# ✅
 
 - [binary-trees](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-csharpaot-2.html)
-- [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-csharpaot-9.html)
+- [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-csharpaot-5.html)
 - [fasta](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fasta-csharpaot-5.html)
-- [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-csharpaot-6.html)
-- [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-csharpaot-9.html)
-- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-csharpaot-3.html) -> Works on x86
-- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-csharpaot-5.html) -> Works on x86
-- [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-csharpaot-2.html)
+- [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-csharpaot-1.html)
+- [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-csharpaot-7.html)
+- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-csharpaot-9.html)
+- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-csharpaot-2.html)
+- [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-csharpaot-5.html)
 
 ## Dart ✅
 
@@ -55,14 +55,14 @@
 - [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-erlang-6.html)
 - [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-erlang-2.html)
 
-## F#
+## F# ✅
 
 - [binary-trees](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-fsharpcore-7.html)
 - [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-fsharpcore-6.html)
 - [fasta](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fasta-fsharpcore-3.html)
 - [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-fsharpcore-6.html)
 - [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-fsharpcore-6.html)
-- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-fsharpcore-6.html) -> Works on x86
+- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-fsharpcore-6.html)
 - [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-fsharpcore-6.html)
 - [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-fsharpcore-6.html)
 
@@ -74,16 +74,16 @@
 - [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-go-7.html)
 - [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-go-4.html)
 - [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-go-3.html) 
-- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-go-3.html)
+- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-go-5.html)
 - [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-go-4.html)
 
-## Haskell
+## Haskell ✅
 
 - [binary-trees](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-ghc-4.html)
 - [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-ghc-3.html)
 - [fasta](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fasta-ghc-6.html)
 - [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-ghc-2.html)
-- [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-ghc-3.html) -> Works on x86
+- [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-ghc-3.html)
 - [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-ghc-2.html)
 - [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-ghc-3.html)
 - [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-ghc-4.html)
@@ -96,7 +96,7 @@
 - [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-graalvmaot-1.html)
 - [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-graalvmaot-6.html)
 - [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-graalvmaot-4.html)
-- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-graalvmaot-3.html)
+- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-graalvmaot-4.html)
 - [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-graalvmaot-3.html)
 
 ## Lua ✅
@@ -162,7 +162,7 @@
 - [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-python3-3.html)
 - [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-python3-7.html)
 - [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-python3-1.html)
-- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-python3-1.html)
+- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-python3-2.html)
 - [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-python3-4.html)
 
 ## Ruby ✅
@@ -176,16 +176,16 @@
 - [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-ruby-3.html)
 - [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-ruby-5.html)
 
-## Rust
+## Rust ✅
 
 - [binary-trees](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-rust-5.html)
-- [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-rust-6.html) -> Works on x86
-- [fasta](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fasta-rust-9.html)
+- [fannkuch-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-rust-6.html)
+- [fasta](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fasta-rust-7.html)
 - [k-nucleotide](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/knucleotide-rust-7.html)
 - [mandelbrot](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-rust-4.html)
-- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-rust-3.html)
-- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-rust-6.html)
-- [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-rust-5.html)
+- [n-body](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/nbody-rust-9.html)
+- [regex-redux](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/regexredux-rust-7.html)
+- [spectral-norm](https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/spectralnorm-rust-6.html)
 
 ## Swift ✅
 

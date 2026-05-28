@@ -1,173 +1,98 @@
 /* The Computer Language Benchmarks Game
    https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-   
-   contributed by Isaac Gouy
-   parallel by The Anh Tran
-   Updated by Alan McGovern
+ 
+   contributed by Jesper Meyer
 */
 
 using System;
-using System.Threading;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+using System.Threading.Tasks;
 
-class SpectralNorm
+namespace SpectralNorm
 {
-    public class BarrierHandle : System.Threading.WaitHandle
+    unsafe class Program
     {
-        int current;
-        int threads;
-        ManualResetEvent handle = new ManualResetEvent (false);
-
-        public BarrierHandle (int threads)
+        public static void Main(string[] args)
         {
-	    this.current = threads;
-            this.threads = threads;
-        }
+            int n = 100;
+            if (args.Length > 0) n = int.Parse(args[0]);
 
-        public override bool WaitOne()
-        {
-            ManualResetEvent h = handle;
-            if (Interlocked.Decrement (ref current) > 0) {
-                h.WaitOne ();
-            }
-            else {
-                handle = new ManualResetEvent (false);
-                Interlocked.Exchange (ref current, threads);
-                h.Set ();
-                h.Close ();
-            }
-
-            return true;
-        }
-    }
-	
-    public static void Main(String[] args)
-    {
-        int n = 2500;
-        if (args.Length > 0)
-            n = Int32.Parse(args[0]);
-
-        Console.WriteLine("{0:f9}", RunGame(n));
-    }
-	
-    private static double RunGame(int n)
-    {
-        // create unit vector
-        double[] u = new double[n];
-        double[] tmp = new double[n];
-        double[] v = new double[n];
-
-        for (int i = 0; i < n; i++)
-            u[i] = 1.0;
-
-        int nthread = Environment.ProcessorCount;
-
-		BarrierHandle barrier = new BarrierHandle (nthread);
-        // objects contain result of each thread
-        Approximate[] apx = new Approximate[nthread];
-
-        // thread handle for waiting/joining
-        Thread[] threads = new Thread[nthread];
-
-        // create thread and hand out tasks
-        int chunk = n / nthread;
-        for (int i = 0; i < nthread; i++)
-        {
-            int r1 = i * chunk;
-            int r2 = (i < (nthread - 1)) ? r1 + chunk : n;
-
-            apx[i] = new Approximate(u, v, tmp, r1, r2);
-			apx[i].Barrier = barrier;
-            threads[i] = new Thread(new ThreadStart(apx[i].Evaluate));
-            threads[i].Start();
-        }
-
-        // collect results
-        double vBv = 0, vv = 0;
-        for (int i = 0; i < nthread; i++)
-        {
-            threads[i].Join();
-
-            vBv += apx[i].m_vBv;
-            vv += apx[i].m_vv;
-        }
-
-        return Math.Sqrt(vBv / vv);
-    }
-
-    private class Approximate
-    {
-        internal BarrierHandle? Barrier;
-        private double[] m_u;
-        private double[] m_v;
-        private double[] m_tmp;
-        private int m_range_begin, m_range_end;
-
-        public double m_vBv = 0, m_vv = 0;
-
-        public Approximate(double[] u, double[] v, double[] tmp, int rbegin, int rend)
-        {
-            m_u = u;
-            m_v = v;
-            m_tmp = tmp;
-
-            m_range_begin = rbegin;
-            m_range_end = rend;
-        }
-
-        public void Evaluate()
-        {
-            for (int i = 0; i < 10; i++)
+            fixed (double* u = new double[n])
+            fixed (double* v = new double[n])
             {
-                MultiplyAtAv(m_u, m_tmp, m_v);
-                MultiplyAtAv(m_v, m_tmp, m_u);
-            }
+                new Span<double>(u, n).Fill(1);
+                for (var i = 0; i < 10; i++)
+                {
+                    mult_AtAv(u, v, n);
+                    mult_AtAv(v, u, n);
+                }
 
-            for (int i = m_range_begin; i < m_range_end; i++)
+                var result = Math.Sqrt(dot(u, v, n) / dot(v, v, n));
+                Console.WriteLine("{0:f9}", result);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double A(int i, int j)
+        {
+            return (i + j) * (i + j + 1) / 2 + i + 1;
+        }
+
+        private static double dot(double* v, double* u, int n)
+        {
+            double sum = 0;
+            for (var i = 0; i < n; i++)
+                sum += v[i] * u[i];
+            return sum;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        private static void mult_Av(double* v, double* outv, int n)
+        {
+            Parallel.For(0, n, i =>
             {
-                m_vBv += m_u[i] * m_v[i];
-                m_vv += m_v[i] * m_v[i];
-            }
+                var sum = Vector128<double>.Zero;
+                for (var j = 0; j < n; j += 2)
+                {
+                    var b = Sse2.LoadVector128(v + j);
+                    var a = Vector128.Create(A(i, j), A(i, j + 1));
+                    sum = Sse2.Add(sum, Sse2.Divide(b, a));
+                }
+
+                var add = Sse3.HorizontalAdd(sum, sum);
+                var value = Unsafe.As<Vector128<double>, double>(ref add);
+                Unsafe.WriteUnaligned(outv + i, value);
+            });
         }
 
-        /* return element i,j of infinite matrix A */
-        private static double eval_A(int i, int j)
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        private static void mult_Atv(double* v, double* outv, int n)
         {
-            int div = (((i + j) * (i + j + 1) >> 1) + i + 1);
-            return 1.0 / div;
-        }
-
-        /* multiply vector v by matrix A */
-        private void MultiplyAv(double[] v, double[] Av)
-        {
-            for (int i = m_range_begin; i < m_range_end; i++)
+            Parallel.For(0, n, i =>
             {
-                double sum = 0.0;
-                for (int j = 0; j < v.Length; j++)
-                    sum += eval_A(i, j) * v[j];
-                Av[i] = sum;
-            }
+                var sum = Vector128<double>.Zero;
+                for (var j = 0; j < n; j += 2)
+                {
+                    var b = Sse2.LoadVector128(v + j);
+                    var a = Vector128.Create(A(j, i), A(j + 1, i));
+                    sum = Sse2.Add(sum, Sse2.Divide(b, a));
+                }
+
+                var add = Sse3.HorizontalAdd(sum, sum);
+                var value = Unsafe.As<Vector128<double>, double>(ref add);
+                Unsafe.WriteUnaligned(outv + i, value);
+            });
         }
 
-        /* multiply vector v by matrix A transposed */
-        private void MultiplyAtv(double[] v, double[] Atv)
+        private static void mult_AtAv(double* v, double* outv, int n)
         {
-            for (int i = m_range_begin; i < m_range_end; i++)
+            fixed (double* tmp = new double[n])
             {
-                double sum = 0.0;
-                for (int j = 0; j < v.Length; j++)
-                    sum += eval_A(j, i) * v[j];
-                Atv[i] = sum;
+                mult_Av(v, tmp, n);
+                mult_Atv(tmp, outv, n);
             }
-        }
-
-        /* multiply vector v by matrix A and then by matrix A transposed */
-        private void MultiplyAtAv(double[] v, double[] tmp, double[] AtAv)
-        {
-            MultiplyAv(v, tmp);
-            Barrier.WaitOne ();
-
-            MultiplyAtv(tmp, AtAv);
-            Barrier.WaitOne ();
         }
     }
 }

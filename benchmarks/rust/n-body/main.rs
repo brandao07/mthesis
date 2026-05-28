@@ -1,239 +1,240 @@
 /// The Computer Language Benchmarks Game
 /// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-/// 
-/// Contributed by Ilia Schelokov
+///
+/// contributed by Miles
+/// converted from C to Rust, by Henry Jayakusuma
+///
+/// As the code of `gcc #9` this code requires hardware supporting
+/// the CPU feature SSE, AVX, implementing SIMD operations.
+///
 
-use std::f64::consts::PI;
-use std::ops::{Add, Sub, Mul, AddAssign, SubAssign};
-use std::default::Default;
-
-#[derive(Clone, Debug)]
-struct Vec3D(f64, f64, f64);
-
-impl Vec3D {
-    fn sum_squares(&self) -> f64 {
-        self.0 * self.0
-            + self.1 * self.1
-            + self.2 * self.2
-    }
-
-    fn magnitude(&self, dt: f64) -> f64 {
-        let sum = self.sum_squares();
-        dt / (sum * sum.sqrt())
-    }
-}
-
-impl Default for Vec3D {
-    fn default() -> Vec3D {
-        Vec3D(0.0, 0.0, 0.0)
-    }
-}
-
-impl Add for &Vec3D {
-    type Output = Vec3D;
-    fn add(self, rhs: Self) -> Self::Output {
-        Vec3D(
-            self.0 + rhs.0,
-            self.1 + rhs.1,
-            self.2 + rhs.2
-        )
-    }
-}
-
-impl Sub for &Vec3D {
-    type Output = Vec3D;
-    fn sub(self, rhs: Self) -> Self::Output {
-        Vec3D(
-            self.0 - rhs.0,
-            self.1 - rhs.1,
-            self.2 - rhs.2
-        )
-    }
-}
-
-impl Mul<f64> for &Vec3D {
-    type Output = Vec3D;
-    fn mul(self, rhs: f64) -> Self::Output {
-        Vec3D(
-            self.0 * rhs,
-            self.1 * rhs,
-            self.2 * rhs
-        )
-    }
-}
-
-impl AddAssign for Vec3D {
-    fn add_assign(&mut self, rhs: Self) {
-        self.0 += rhs.0;
-        self.1 += rhs.1;
-        self.2 += rhs.2;
-    }
-}
-
-impl SubAssign for Vec3D {
-    fn sub_assign(&mut self, rhs: Self) {
-        self.0 -= rhs.0;
-        self.1 -= rhs.1;
-        self.2 -= rhs.2;
-    }
-}
-
-#[derive(Clone, Debug)]
-struct Body {
-    position: Vec3D,
-    velocity: Vec3D,
-    mass: f64,
-}
-
-const BODIES_COUNT: usize = 5;
-
-const SOLAR_MASS: f64 = 4. * PI * PI;
+const N: usize = 5;
+const PI: f64 = 3.141592653589793;
+const SOLAR_MASS: f64 = 4.0 * PI * PI;
 const DAYS_PER_YEAR: f64 = 365.24;
+const PAIRS: usize = N * (N - 1) / 2;
 
-const INTERACTIONS: usize = BODIES_COUNT * (BODIES_COUNT - 1) / 2;
+use std::arch::x86_64::*;
+use std::mem::{MaybeUninit, transmute};
 
-const STARTING_STATE: [Body; BODIES_COUNT] = [
-    // Sun
-    Body {
-        mass: SOLAR_MASS,
-        position: Vec3D(0., 0., 0.),
-        velocity: Vec3D(0., 0., 0.),
-    },
-    // Jupiter
-    Body {
-        position: Vec3D(
-            4.841_431_442_464_72e0,
-            -1.160_320_044_027_428_4e0,
-            -1.036_220_444_711_231_1e-1,
-        ),
-        velocity: Vec3D(
-            1.660_076_642_744_037e-3 * DAYS_PER_YEAR,
-            7.699_011_184_197_404e-3 * DAYS_PER_YEAR,
-            -6.904_600_169_720_63e-5 * DAYS_PER_YEAR,
-        ),
-        mass: 9.547_919_384_243_266e-4 * SOLAR_MASS,
-    },
-    // Saturn
-    Body {
-        position: Vec3D(
-            8.343_366_718_244_58e0,
-            4.124_798_564_124_305e0,
-            -4.035_234_171_143_214e-1,
-        ),
-        velocity: Vec3D(
-            -2.767_425_107_268_624e-3 * DAYS_PER_YEAR,
-            4.998_528_012_349_172e-3 * DAYS_PER_YEAR,
-            2.304_172_975_737_639_3e-5 * DAYS_PER_YEAR,
-        ),
-        mass: 2.858_859_806_661_308e-4 * SOLAR_MASS,
-    },
-    // Uranus
-    Body {
-        position: Vec3D(
-            1.289_436_956_213_913_1e1,
-            -1.511_115_140_169_863_1e1,
-            -2.233_075_788_926_557_3e-1,
-        ),
-        velocity: Vec3D(
-            2.964_601_375_647_616e-3 * DAYS_PER_YEAR,
-            2.378_471_739_594_809_5e-3 * DAYS_PER_YEAR,
-            -2.965_895_685_402_375_6e-5 * DAYS_PER_YEAR,
-        ),
-        mass: 4.366_244_043_351_563e-5 * SOLAR_MASS,
-    },
-    // Neptune
-    Body {
-        position: Vec3D(
-            1.537_969_711_485_091_1e1,
-            -2.591_931_460_998_796_4e1,
-            1.792_587_729_503_711_8e-1,
-        ),
-        velocity: Vec3D(
-            2.680_677_724_903_893_2e-3 * DAYS_PER_YEAR,
-            1.628_241_700_382_423e-3 * DAYS_PER_YEAR,
-            -9.515_922_545_197_159e-5 * DAYS_PER_YEAR,
-        ),
-        mass: 5.151_389_020_466_114_5e-5 * SOLAR_MASS,
-    },
-];
+#[repr(align(32))]
+struct AlignedW([f64; PAIRS + 6]);
 
-/// Steps the simulation forward by one time-step.
-fn advance(bodies: &mut [Body; BODIES_COUNT], dt: f64, steps: usize) {
-    let mut d_positions: [Vec3D; INTERACTIONS] = Default::default();
-    let mut magnitudes = [0.; INTERACTIONS];
+#[inline(always)]
+unsafe fn _mm256_rsqrt_pd(
+    s: __m256d
+) -> __m256d {
+    let q = _mm256_cvtpd_ps(s);
+    let q = _mm_rsqrt_ps(q);
+    let x = _mm256_cvtps_pd(q);
+    let y = _mm256_mul_pd(_mm256_mul_pd(s, x), x);
+    let a = _mm256_mul_pd(y, _mm256_set1_pd(0.375));
+    let a = _mm256_mul_pd(a, y);
+    let b = _mm256_mul_pd(y, _mm256_set1_pd(1.25));
+    let b = _mm256_sub_pd(b, _mm256_set1_pd(1.875));
+    let y = _mm256_sub_pd(a, b);
+    _mm256_mul_pd(x, y)
+}
 
-    for _ in 0 .. steps {
-        // Vectors between each pair of bodies.
-        let mut k = 0;
-        for (i, body1) in bodies.iter().enumerate() {
-            for body2 in &bodies[i + 1 ..] {
-                d_positions[k] = &body1.position - &body2.position;
-                k += 1;
-            }
+// The type for w is [f64; PAIRS + 6] here because rust complains about
+// transmuting to struct of different size.
+#[inline(always)]
+unsafe fn kernel(
+    r: &mut [__m256d; PAIRS + 3],
+    w: &mut [f64; PAIRS + 6],
+    p: &[__m256d; N],
+) {
+    let mut k: usize = 0;
+    for i in 1..N {
+        for j in 0..i {
+            r[k] = _mm256_sub_pd(p[i], p[j]);
+            k = k + 1;
         }
-    
-        // Magnitude between each pair of bodies.
-        for (mag, d_pos) in magnitudes.iter_mut().zip(d_positions.iter()) {
-            *mag = d_pos.magnitude(dt);
-        };
-    
-        // Apply every other body's gravitation to each body's velocity.
-        let mut k = 0;
-        for i in 0 .. BODIES_COUNT - 1 {
-            let (body1, rest) = bodies[i..].split_first_mut().unwrap();
-            for body2 in rest {
-                let d_pos       = &d_positions[k];
-                let mag         = magnitudes[k];
-                body1.velocity -= d_pos * (body2.mass * mag);
-                body2.velocity += d_pos * (body1.mass * mag);
-                k += 1;
-            }
-        }
-    
-        // Update positions
-        for body in bodies.iter_mut() {
-            body.position += &body.velocity * dt;
-        }
+    }
+
+    for k in (0..PAIRS).step_by(4) {
+        let x0 = _mm256_mul_pd(r[k], r[k]);
+        let x1 = _mm256_mul_pd(r[k + 1], r[k + 1]);
+        let x2 = _mm256_mul_pd(r[k + 2], r[k + 2]);
+        let x3 = _mm256_mul_pd(r[k + 3], r[k + 3]);
+
+        let t0 = _mm256_hadd_pd(x0, x1);
+        let t1 = _mm256_hadd_pd(x2, x3);
+        let y0 = _mm256_permute2f128_pd::<0x21>(t0, t1);
+        let y1 = _mm256_blend_pd::<0b1100>(t0, t1);
+
+        let z = _mm256_add_pd(y0, y1);
+        let z = _mm256_rsqrt_pd(z);
+        _mm256_store_pd(w.as_mut_ptr().offset(k as isize), z);
     }
 }
 
-/// Adjust the Sun's velocity to offset system momentum.
-fn offset_momentum(bodies: &mut [Body; BODIES_COUNT]) {
-    let (sun, planets) = bodies.split_first_mut().unwrap();
-    sun.velocity = Default::default();
-    for planet in planets {
-        sun.velocity -= &planet.velocity * (planet.mass / SOLAR_MASS);
-    }
-}
+unsafe fn energy(
+    m: &[f64; N],
+    p: &[__m256d; N],
+    v: &[__m256d; N],
+) -> f64 {
+    let mut e: f64 = 0.0;
+    let mut r: [__m256d; PAIRS + 3] = MaybeUninit::uninit().assume_init();
+    let w: AlignedW = MaybeUninit::uninit().assume_init();
+    let mut w = transmute::<AlignedW, [f64; PAIRS + 6]>(w);
 
-/// Print the system energy.
-fn compute_energy(bodies: &mut [Body; BODIES_COUNT]) -> f64 {
-    let mut energy = 0.;
-    for (i, body1) in bodies.iter().enumerate() {
-        // Add the kinetic energy for each body.
-        energy += 0.5
-            * body1.mass
-            * body1.velocity.sum_squares();
-        // Add the potential energy between this body and every other body.
-        for body2 in &bodies[i + 1 ..] {
-            let d_pos = &body1.position - &body2.position;
-            energy -= body1.mass * body2.mass / d_pos.sum_squares().sqrt();
+    r[N] = _mm256_set1_pd(0.0);
+    r[N + 1] = _mm256_set1_pd(0.0);
+    r[N + 2] = _mm256_set1_pd(0.0);
+
+    for k in 0..N { r[k] = _mm256_mul_pd(v[k], v[k]); }
+
+    for k in (0..N).step_by(4) {
+        let t0 = _mm256_hadd_pd(r[k], r[k + 1]);
+        let t1 = _mm256_hadd_pd(r[k + 2], r[k + 3]);
+        let y0 = _mm256_permute2f128_pd::<0x21>(t0, t1);
+        let y1 = _mm256_blend_pd::<0b1100>(t0, t1);
+
+        let z = _mm256_add_pd(y0, y1);
+        _mm256_store_pd(w.as_mut_ptr().offset(k as isize), z);
+    }
+
+    for k in 0..N { e += 0.5 * m[k] * w[k] }
+
+    r[PAIRS] = _mm256_set1_pd(1.0);
+    r[PAIRS + 1] = _mm256_set1_pd(1.0);
+    r[PAIRS + 2] = _mm256_set1_pd(1.0);
+
+    kernel(&mut r, &mut w, &p);
+
+    let mut k = 0;
+    for i in 1..N {
+        for j in 0..i {
+            e -= m[i] * m[j] * w[k];
+            k = k + 1;
         }
     }
-    energy
+
+    e
+}
+
+unsafe fn advance(
+    n: i32,
+    dt: f64,
+    m: &[f64; N],
+    p: &mut [__m256d; N],
+    v: &mut [__m256d; N],
+) {
+    let mut r: [__m256d; PAIRS + 3] = MaybeUninit::uninit().assume_init();
+    let w: AlignedW = MaybeUninit::uninit().assume_init();
+    let mut w = transmute::<AlignedW, [f64; PAIRS + 6]>(w);
+    r[PAIRS] = _mm256_set1_pd(1.0);
+    r[PAIRS + 1] = _mm256_set1_pd(1.0);
+    r[PAIRS + 2] = _mm256_set1_pd(1.0);
+
+    let rt = _mm256_set1_pd(dt);
+
+    let mut rm: [__m256d; N] = MaybeUninit::uninit().assume_init();
+    for i in 0..N { rm[i] = _mm256_set1_pd(m[i]); }
+    for _s in 0..n {
+        kernel(&mut r, &mut w, &p);
+
+        for k in (0..PAIRS).step_by(4) {
+            let x = _mm256_load_pd(w.as_mut_ptr().offset(k as isize));
+            let y = _mm256_mul_pd(x, x);
+            let z = _mm256_mul_pd(x, rt);
+            let x = _mm256_mul_pd(y, z);
+            _mm256_store_pd(w.as_mut_ptr().offset(k as isize), x);
+        }
+
+        let mut k: usize = 0;
+        for i in 1..N {
+            for j in 0..i {
+                let t = _mm256_set1_pd(w[k]);
+                let t = _mm256_mul_pd(r[k], t);
+                let x = _mm256_mul_pd(t, rm[j]);
+                let y = _mm256_mul_pd(t, rm[i]);
+
+                v[i] = _mm256_sub_pd(v[i], x);
+                v[j] = _mm256_add_pd(v[j], y);
+                k = k + 1;
+            }
+        }
+
+        for i in 0..N {
+            let t = _mm256_mul_pd(v[i], rt);
+            p[i] = _mm256_add_pd(p[i], t);
+        }
+    }
 }
 
 fn main() {
-    let ncycles = std::env::args_os()
+    let n = std::env::args_os()
         .nth(1)
         .and_then(|s| s.into_string().ok())
         .and_then(|n| n.parse().ok())
         .unwrap_or(1000);
 
-    let mut bodies = STARTING_STATE;
+    unsafe {
+        let mut m: [f64; N] = MaybeUninit::uninit().assume_init();
+        let mut p: [__m256d; N] = MaybeUninit::uninit().assume_init();
+        let mut v: [__m256d; N] = MaybeUninit::uninit().assume_init();
 
-    offset_momentum(&mut bodies);
-    println!("{:.9}", compute_energy(&mut bodies));
-    advance(&mut bodies, 0.01, ncycles);
-    println!("{:.9}", compute_energy(&mut bodies));
+        // sun
+        m[0] = SOLAR_MASS;
+        p[0] = _mm256_set1_pd(0.0);
+        v[0] = _mm256_set1_pd(0.0);
+
+        // jupiter
+        m[1] = 9.54791938424326609e-04 * SOLAR_MASS;
+        p[1] = _mm256_setr_pd(0.0,
+                              4.84143144246472090e+00,
+                              -1.16032004402742839e+00,
+                              -1.03622044471123109e-01);
+        v[1] = _mm256_setr_pd(0.0,
+                              1.66007664274403694e-03 * DAYS_PER_YEAR,
+                              7.69901118419740425e-03 * DAYS_PER_YEAR,
+                              -6.90460016972063023e-05 * DAYS_PER_YEAR);
+
+        // saturn
+        m[2] = 2.85885980666130812e-04 * SOLAR_MASS;
+        p[2] = _mm256_setr_pd(0.0,
+                              8.34336671824457987e+00,
+                              4.12479856412430479e+00,
+                              -4.03523417114321381e-01);
+        v[2] = _mm256_setr_pd(0.0,
+                              -2.76742510726862411e-03 * DAYS_PER_YEAR,
+                              4.99852801234917238e-03 * DAYS_PER_YEAR,
+                              2.30417297573763929e-05 * DAYS_PER_YEAR);
+
+        // uranus
+        m[3] = 4.36624404335156298e-05 * SOLAR_MASS;
+        p[3] = _mm256_setr_pd(0.0,
+                              1.28943695621391310e+01,
+                              -1.51111514016986312e+01,
+                              -2.23307578892655734e-01);
+        v[3] = _mm256_setr_pd(0.0,
+                              2.96460137564761618e-03 * DAYS_PER_YEAR,
+                              2.37847173959480950e-03 * DAYS_PER_YEAR,
+                              -2.96589568540237556e-05 * DAYS_PER_YEAR);
+
+        // neptune
+        m[4] = 5.15138902046611451e-05 * SOLAR_MASS;
+        p[4] = _mm256_setr_pd(0.0,
+                              1.53796971148509165e+01,
+                              -2.59193146099879641e+01,
+                              1.79258772950371181e-01);
+        v[4] = _mm256_setr_pd(0.0,
+                              2.68067772490389322e-03 * DAYS_PER_YEAR,
+                              1.62824170038242295e-03 * DAYS_PER_YEAR,
+                              -9.51592254519715870e-05 * DAYS_PER_YEAR);
+
+        // offset momentum
+        let mut o = _mm256_set1_pd(0.0);
+        for i in 0..N {
+            let t = _mm256_mul_pd(_mm256_set1_pd(m[i]), v[i]);
+            o = _mm256_add_pd(o, t);
+        }
+
+        v[0] = _mm256_mul_pd(o, _mm256_set1_pd(-1.0 / SOLAR_MASS));
+        println!("{:.9}", energy(&m, &p, &v));
+        advance(n, 0.01, &mut m, &mut p, &mut v);
+        println!("{:.9}", energy(&m, &p, &v));
+    }
 }

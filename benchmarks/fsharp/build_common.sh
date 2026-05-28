@@ -51,12 +51,12 @@ cp "$SRC_FS" "$BUILD_DIR/Program.fs"
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <RuntimeIdentifier>$RID</RuntimeIdentifier>
-    <UseAppHost>true</UseAppHost>
-    <Optimize>true</Optimize>
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>none</DebugType>
-    <Deterministic>false</Deterministic>
-    <ImplicitUsings>false</ImplicitUsings>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <PublishAot>false</PublishAot>
   </PropertyGroup>
 EOF
 

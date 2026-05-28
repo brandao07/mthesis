@@ -7,9 +7,11 @@ services:
     image: haskell:9.10.1
     setup-commands:
       - shell: bash
-        command: cabal update && cabal install --lib parallel hashable hashtables containers bytestring
+        command: apt-get update && for version in 15 14 13; do if apt-cache show "llvm-${version}" "clang-${version}" >/dev/null 2>&1; then apt-get install -y --no-install-recommends "llvm-${version}" "clang-${version}" libpcre2-dev && ln -sf "/usr/bin/opt-${version}" /usr/local/bin/opt && ln -sf "/usr/bin/llc-${version}" /usr/local/bin/llc && ln -sf "/usr/bin/clang-${version}" /usr/local/bin/clang && break; fi; done && test -x /usr/local/bin/opt && test -x /usr/local/bin/llc && test -x /usr/local/bin/clang && rm -rf /var/lib/apt/lists/*
+      - shell: bash
+        command: cabal update && cabal install --lib parallel hashable hashtables containers bytestring unordered-containers pvar
       - shell: sh
-        command: mkdir -p /tmp/haskell-k-nucleotide && ghc -O2 -XBangPatterns -threaded -rtsopts -XMagicHash /tmp/repo/benchmarks/haskell/k-nucleotide/main.hs -outputdir /tmp/haskell-k-nucleotide -odir /tmp/haskell-k-nucleotide -hidir /tmp/haskell-k-nucleotide -o /tmp/haskell-k-nucleotide/main
+        command: mkdir -p /tmp/haskell-k-nucleotide && ghc -O2 -XBangPatterns -fllvm -funbox-strict-fields -XScopedTypeVariables -package hashable -package unordered-containers -package pvar -package ghc-compact -threaded -rtsopts /tmp/repo/benchmarks/haskell/k-nucleotide/main.hs -outputdir /tmp/haskell-k-nucleotide -odir /tmp/haskell-k-nucleotide -hidir /tmp/haskell-k-nucleotide -o /tmp/haskell-k-nucleotide/main
     command: sleep infinity
 
 flow:

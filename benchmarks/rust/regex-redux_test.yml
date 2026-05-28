@@ -7,7 +7,7 @@ services:
     image: rust:1.93-alpine
     setup-commands:
       - shell: sh
-        command: apk add --no-cache rust cargo
+        command: apk add --no-cache rust cargo pcre2-dev pkgconf
       - shell: sh
         command: mkdir -p /tmp/rust-prefetch/regex-redux && cp /tmp/repo/benchmarks/rust/regex-redux/Cargo.toml /tmp/rust-prefetch/regex-redux/Cargo.toml && CARGO_HOME=/tmp/cargo-home cargo generate-lockfile --manifest-path /tmp/rust-prefetch/regex-redux/Cargo.toml && CARGO_HOME=/tmp/cargo-home cargo fetch --locked --manifest-path /tmp/rust-prefetch/regex-redux/Cargo.toml
       - command: sh /tmp/repo/benchmarks/rust/regex-redux/build_in_tmp.sh

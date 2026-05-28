@@ -1,128 +1,102 @@
+/* The Computer Language Benchmarks Game
+ * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+ *
+ * regex-dna program contributed by The Go Authors.
+ * modified by Tylor Arndt.
+ * modified by Chandra Sekar S to use optimized PCRE binding.
+ * modified by Matt Dellandrea.
+ * modified by Pavel Griaznov to use PCRE JIT compilation.
+ */
+
 package main
 
-/* The Computer Language Benchmarks Game
-   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-
-   Contributed by Dean Becker
-*/
-
 import (
-   "io/ioutil"
-   "os"
-   "fmt"
-   "regexp"
+    "fmt"
+    "io/ioutil"
+    "os"
+    "runtime"
+
+    "github.com/GRbit/go-pcre"
 )
 
-// regex and replacement string
-type subst struct {
-   re                *regexp.Regexp
-   replacementString []byte
+type substitution struct {
+    pattern     string
+    replacement string
 }
 
-// regex and result value
-type variant struct {
-   re     *regexp.Regexp
-   result int // for storing the result of the re
-}
+func countMatches(pat string, b []byte) int {
+    m := pcre.MustCompileJIT(pat, 0, pcre.STUDY_JIT_COMPILE).Matcher(b, 0)
+    n := 0
 
-var (
-   variants      []*variant
-   substitutions []*subst
-   bytes         []byte
-   originalLen   int
-   cleanedLen    int
-   cleanRE       *subst
-)
+    for f := m.Matches; f; f = m.Match(b, 0) {
+        n++
+
+        b = b[m.Index()[1]:]
+    }
+
+    return n
+}
 
 func main() {
+    var variants = []string{
+        "agggtaaa|tttaccct",
+        "[cgt]gggtaaa|tttaccc[acg]",
+        "a[act]ggtaaa|tttacc[agt]t",
+        "ag[act]gtaaa|tttac[agt]ct",
+        "agg[act]taaa|ttta[agt]cct",
+        "aggg[acg]aaa|ttt[cgt]ccct",
+        "agggt[cgt]aa|tt[acg]accct",
+        "agggta[cgt]a|t[acg]taccct",
+        "agggtaa[cgt]|[acg]ttaccct",
+    }
 
-   doneCh := make(chan int)
+    var substs = []substitution{
+        {"tHa[Nt]", "<4>"},
+        {"aND|caN|Ha[DS]|WaS", "<3>"},
+        {"a[NSt]|BY", "<2>"},
+        {"<[^>]*>", "|"},
+        {"\\|[^|][^|]*\\|", "-"},
+    }
 
-   // initialize concurrently
-   go loadFile(doneCh)
-   go initRegexes(doneCh)
+    runtime.GOMAXPROCS(runtime.NumCPU())
 
-   // wait for the above routines to finish
-   <-doneCh
-   <-doneCh
+    b, err := ioutil.ReadAll(os.Stdin)
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "can't read input: %s\n", err)
+        os.Exit(2)
+    }
 
-   // clean the input
-   bytes = cleanRE.re.ReplaceAllLiteral(bytes, cleanRE.replacementString)
-   cleanedLen = len(bytes)
+    ilen := len(b)
 
-   // since this one takes longest, start it first
-   finalLen := make(chan int)
-   go func() {
-      // copy our bytes so we don't trounce the variant routines
-      bb := make([]byte, len(bytes))
-      copy(bb, bytes)
+    // Delete the comment lines and newlines
+    b = pcre.
+        MustCompileJIT("(>[^\n]*)?\n", 0, pcre.STUDY_JIT_COMPILE).
+        ReplaceAll(b, []byte{}, 0)
+    clen := len(b)
 
-      for _, sub := range substitutions {
-         bb = sub.re.ReplaceAll(bb, sub.replacementString)
-      }
+    mresults := make([]chan int, len(variants))
+    for i := 0; i < len(variants); i++ {
+        mresults[i] = make(chan int)
 
-      finalLen <- len(bb)
-   }()
+        go func(ch chan int, s string) {
+            ch <- countMatches(s, b)
+        }(mresults[i], variants[i])
+    }
 
-   // variant routines
-   for _, v := range variants {
-      go countVariants(doneCh, v)
-   }
+    lenresult := make(chan int)
 
-   // await all variant results (so we can see them in order)
-   for range variants {
-      <-doneCh
-   }
+    go func(b []byte) {
+        for i := 0; i < len(substs); i++ {
+            b = pcre.
+                MustCompileJIT(substs[i].pattern, 0, pcre.STUDY_JIT_COMPILE).
+                ReplaceAll(b, []byte(substs[i].replacement), 0)
+        }
+        lenresult <- len(b)
+    }(b)
 
-   // print all variant results
-   for _, v := range variants {
-      fmt.Printf("%s %d\n", v.re.String(), v.result)
-   }
+    for i := 0; i < len(variants); i++ {
+        fmt.Printf("%s %d\n", variants[i], <-mresults[i])
+    }
 
-   // print finalLen when it's available
-   fmt.Printf("\n%d\n%d\n%d\n", originalLen, cleanedLen, <-finalLen)
-
-}
-
-func loadFile(doneCh chan int) {
-   var err error
-   bytes, err = ioutil.ReadAll(os.Stdin)
-   if err != nil {
-      fmt.Fprintf(os.Stderr, "can't read input: %s\n", err)
-      os.Exit(2)
-   }
-   originalLen = len(bytes)
-   doneCh <- 1
-}
-
-func countVariants(doneCh chan int, v *variant) {
-   v.result = len(v.re.FindAll(bytes, -1))
-   doneCh <- 1
-}
-
-func initRegexes(doneCh chan int) {
-
-   variants = []*variant{
-      {re: regexp.MustCompile("agggtaaa|tttaccct")},
-      {re: regexp.MustCompile("[cgt]gggtaaa|tttaccc[acg]")},
-      {re: regexp.MustCompile("a[act]ggtaaa|tttacc[agt]t")},
-      {re: regexp.MustCompile("ag[act]gtaaa|tttac[agt]ct")},
-      {re: regexp.MustCompile("agg[act]taaa|ttta[agt]cct")},
-      {re: regexp.MustCompile("aggg[acg]aaa|ttt[cgt]ccct")},
-      {re: regexp.MustCompile("agggt[cgt]aa|tt[acg]accct")},
-      {re: regexp.MustCompile("agggta[cgt]a|t[acg]taccct")},
-      {re: regexp.MustCompile("agggtaa[cgt]|[acg]ttaccct")},
-   }
-
-   substitutions = []*subst{
-      {regexp.MustCompile("tHa[Nt]"), []byte("<4>")},
-      {regexp.MustCompile("aND|caN|Ha[DS]|WaS"), []byte("<3>")},
-      {regexp.MustCompile("a[NSt]|BY"), []byte("<2>")},
-      {regexp.MustCompile("<[^>]*>"), []byte("|")},
-      {regexp.MustCompile("\\|[^|][^|]*\\|"), []byte("-")},
-   }
-
-   cleanRE = &subst{regexp.MustCompile("(>[^\n]+)?\n"), []byte("")}
-
-   doneCh <- 1
+    fmt.Printf("\n%d\n%d\n%d\n", ilen, clen, <-lenresult)
 }

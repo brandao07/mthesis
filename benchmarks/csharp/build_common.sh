@@ -61,14 +61,19 @@ cp "$SRC_CS" "$BUILD_DIR/Program.cs"
     <IlcInstructionSet>native</IlcInstructionSet>
 EOF
 
-  if [ "$BENCH" = "mandelbrot" ]; then
+  cat <<'EOF'
+  </PropertyGroup>
+EOF
+
+  if [ "$BENCH" = "k-nucleotide" ]; then
     cat <<'EOF'
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Experimental.Collections" Version="1.0.6-e190117-3" />
+  </ItemGroup>
 EOF
   fi
 
   cat <<'EOF'
-  </PropertyGroup>
 </Project>
 EOF
 } > "$PROJECT_FILE"

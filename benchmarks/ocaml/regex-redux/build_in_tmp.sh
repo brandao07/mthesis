@@ -19,14 +19,14 @@ fi
 opam exec -- ocamlfind ocamlopt \
   -noassert \
   -unsafe \
+  -fPIC \
   -nodynlink \
   -inline 100 \
   -O3 \
   -package "$RE_PACKAGE" \
   -package unix \
   -linkpkg \
-  -ccopt -fPIC \
-  -ccopt -march=ivybridge \
+  -ccopt -march=native \
   "$SRC_ML" \
   -o "$BIN"
 

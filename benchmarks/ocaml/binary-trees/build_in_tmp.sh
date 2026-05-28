@@ -9,12 +9,12 @@ cp /tmp/repo/benchmarks/ocaml/binary-trees/main.ml "$SRC_ML"
 opam exec -- ocamlopt \
   -noassert \
   -unsafe \
+  -fPIC \
   -nodynlink \
   -inline 100 \
   -O3 \
   -I +unix unix.cmxa \
-  -ccopt -fPIC \
-  -ccopt -march=ivybridge \
+  -ccopt -march=native \
   "$SRC_ML" \
   -o "$BIN"
 

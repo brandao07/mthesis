@@ -6,7 +6,7 @@ services:
   c-container:
     image: gcc:15.2.0
     setup-commands:
-      - command: gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp /tmp/repo/benchmarks/c/fannkuch-redux/main.c -o /tmp/main
+      - command: gcc -pipe -Wall -O3 -fomit-frame-pointer -march=native -pthread /tmp/repo/benchmarks/c/fannkuch-redux/main.c -o /tmp/main
     command: sleep infinity
 
 flow:

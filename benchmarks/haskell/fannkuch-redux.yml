@@ -7,9 +7,9 @@ services:
     image: haskell:9.10.1
     setup-commands:
       - shell: bash
-        command: apt-get update && apt-get install -y --no-install-recommends libpcre2-dev && rm -rf /var/lib/apt/lists/*
+        command: apt-get update && for version in 15 14 13; do if apt-cache show "llvm-${version}" "clang-${version}" >/dev/null 2>&1; then apt-get install -y --no-install-recommends "llvm-${version}" "clang-${version}" libpcre2-dev && ln -sf "/usr/bin/opt-${version}" /usr/local/bin/opt && ln -sf "/usr/bin/llc-${version}" /usr/local/bin/llc && ln -sf "/usr/bin/clang-${version}" /usr/local/bin/clang && break; fi; done && test -x /usr/local/bin/opt && test -x /usr/local/bin/llc && test -x /usr/local/bin/clang && rm -rf /var/lib/apt/lists/*
       - shell: sh
-        command: mkdir -p /tmp/haskell-fannkuch-redux && ghc -O2 -XBangPatterns -threaded -rtsopts -XMagicHash /tmp/repo/benchmarks/haskell/fannkuch-redux/main.hs -outputdir /tmp/haskell-fannkuch-redux -odir /tmp/haskell-fannkuch-redux -hidir /tmp/haskell-fannkuch-redux -o /tmp/haskell-fannkuch-redux/main
+        command: mkdir -p /tmp/haskell-fannkuch-redux && ghc -O2 -XBangPatterns -fllvm -XScopedTypeVariables -threaded -rtsopts /tmp/repo/benchmarks/haskell/fannkuch-redux/main.hs -outputdir /tmp/haskell-fannkuch-redux -odir /tmp/haskell-fannkuch-redux -hidir /tmp/haskell-fannkuch-redux -o /tmp/haskell-fannkuch-redux/main
     command: sleep infinity
 
 flow:
