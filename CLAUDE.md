@@ -19,6 +19,10 @@ make measure lang=go                                # single language
 make measure lang=go,c bench=binary-trees,mandelbrot iterations=10
 make measure lang=go profile=test                   # fast test run (--dev-no-sleeps, _test.yml files)
 
+# Results pipeline
+.venv/bin/python scripts/merge_results.py           # merge kwa/results/measurements_*.csv → results/results_linux.csv
+# Then re-run notebooks/01_data_cleaning.ipynb to regenerate results_clean.csv + results_clean_runs.csv
+
 # KWA exporter
 make kwa-build      # compile to kwa/build/kwa
 make kwa-run        # run from source
@@ -32,6 +36,20 @@ pip install -r requirements.txt
 jupyter lab
 ```
 
+## Languages & Paradigms
+
+18 languages across 3 execution paradigms:
+
+| Paradigm    | Languages |
+|-------------|-----------|
+| AOT         | C, C++, C#, Dart, Go, Haskell, Java, OCaml, Rust, Swift |
+| JIT/VM      | Erlang, F#, JavaScript (Node.js), PHP, Ruby |
+| Interpreted | Lua, Perl, Python |
+
+> **Note on Java:** All Java benchmarks use **GraalVM Native Image** (AOT) via `ghcr.io/graalvm/native-image-community:23.0.2`. The community image only supports Serial GC — G1GC requires GraalVM Enterprise.
+>
+> **Note on F# and C#:** Benchmarks compile with `dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishAot=true` using .NET 9 Native AOT. F# is classified as JIT because it targets the .NET runtime/CLR ecosystem despite AOT compilation here.
+
 ## Architecture
 
 ### Benchmark Layer (`benchmarks/<lang>/`)
@@ -39,15 +57,32 @@ jupyter lab
 Each language has one `.yml` file per benchmark for GMT to run. Naming conventions:
 - `<benchmark>.yml` — canonical measurement run (`profile=measure`)
 - `<benchmark>_test.yml` — fast smoke-test run (`profile=test`, uses smaller inputs)
-- `gmt-cluster-scenario.yml` — all 8 benchmarks combined in separate flows (stdout suppressed to `/dev/null`)
+- `gmt-cluster-scenario.yml` — all 8 benchmarks combined in separate flows (stdout suppressed to `/dev/null`); only present for `c` and `python`
 
 Each YAML defines a `services` block (Docker container + optional `setup-commands` for compilation) and a `flow` block (sequence of timed commands). The C/C++/compiled language YMLs compile in `setup-commands`; interpreted languages just run directly in the flow.
 
 `inputs/` holds shared input files (`fasta-*.txt`) mounted into containers at `/tmp/repo/inputs/`.
 
-### `scripts/measure.sh`
+### `scripts/`
 
-Orchestrates GMT runs. Resolves which `benchmarks/<lang>/<bench>[_test].yml` files to pass to GMT's `runner.py` based on `lang=`, `bench=`, `profile=`, and `iterations=` arguments. Calls `green-metrics-tool/runner.py` via the GMT venv Python directly.
+- **`measure.sh`** — orchestrates GMT runs; resolves which `benchmarks/<lang>/<bench>[_test].yml` files to pass to GMT's `runner.py` based on `lang=`, `bench=`, `profile=`, and `iterations=` arguments; calls `green-metrics-tool/runner.py` via the GMT venv Python directly
+- **`merge_results.py`** — reads `kwa/results/measurements_*.csv` (one file per language), normalises container-specific disk/network column names (e.g. `node` → `container` for nodejs), concatenates all 18 files, and writes `results/results_linux.csv`
+- **`setup.sh`** / **`uninstall.sh`** — called by `make setup` / `make uninstall`
+
+### Results Pipeline
+
+```
+GMT runs → kwa export → kwa/results/measurements_<lang>.csv (18 files)
+         → scripts/merge_results.py
+         → results/results_linux.csv            (raw; 1440 rows, µJ/µs/µg/bytes/mW units)
+         → notebooks/01_data_cleaning.ipynb
+         → results/results_clean_runs.csv       (per-run, outliers removed, units converted)
+         → results/results_clean.csv            (mean per language × benchmark)
+```
+
+**Outlier removal** (done in `01_data_cleaning.ipynb`): 1.5×IQR boxplot fence applied **per (language × benchmark)** group on CPU energy + execution time; IQR=0 groups are skipped. Minimum 5 clean runs per cell enforced.
+
+**Unit conversions**: µJ → J (÷1e6), µs → s (÷1e6), µg → g (÷1e6), Bytes → MB (÷1e6), mW → W (÷1e3).
 
 ### KWA (`kwa/`)
 
@@ -67,9 +102,39 @@ cli → app/export + app/measure → api → service → data
 
 The CSV schema has fixed columns `run_id, measured_at, language, benchmark` followed by dynamic metric columns discovered from the data.
 
+See `kwa/CLAUDE.md` for detailed kwa-specific guidance.
+
 ### `notebooks/`
 
-Jupyter notebooks for data analysis. `01_data_cleaning.ipynb` processes raw GMT exports into `results/results_clean.csv`. Notebooks `03–10` are per-benchmark deep dives; `02` and `11` cover cross-language visualization and disk I/O.
+Jupyter notebooks for data analysis.
+
+**v1 (original):**
+- `01_data_cleaning.ipynb` — upstream cleaning pipeline; the single source of truth for outlier removal and unit conversion; exports `results_clean.csv` (aggregated) and `results_clean_runs.csv` (per-run)
+- `02_visualization.ipynb` — cross-language ranking and thesis-ready charts; loads `results_clean.csv`
+- `03–10` — per-benchmark deep dives (binary-trees, fannkuch-redux, fasta, k-nucleotide, mandelbrot, n-body, regex-redux, spectral-norm)
+- `11_disk_io_deep_dive.ipynb` — disk I/O analysis
+
+**v2 (`notebooks/v2/`):**
+Generated by `notebooks/v2/generate_notebooks.py` (run the script to regenerate all 4 notebooks). All v2 notebooks load from `results/results_clean_runs.csv` — no inline outlier removal.
+
+- `01_data_profiling_v2.ipynb` — EDA: column overview, missing values, distributions, data coverage heatmap, per-language summary
+- `02_energy_analysis_v2.ipynb` — CPU + memory energy boxplots, paradigm violin plots, Kruskal-Wallis + Mann-Whitney U + Bonferroni + rank-biserial, per-benchmark heatmap, efficiency ranking
+- `03_time_analysis_v2.ipynb` — execution time boxplots (log scale), Spearman correlations, paradigm speed comparison, EDP ranking
+- `04_comparative_v2.ipynb` — normalized ranking table (ratio vs best language), multi-metric ranking (mean of benchmark means, sorted by EDP rank), radar chart, normalised heatmap, top3/bottom3, key findings; exports `outputs/ranking_summary.csv`
+
+**v2 key conventions:**
+- Figures saved to `notebooks/v2/figures/` (gitignored)
+- Outputs (CSVs) saved to `notebooks/v2/outputs/` (gitignored)
+- EDP = (CPU Energy + Memory Energy) × Time (J·s)
+- Rankings use two-step mean: per-(language × benchmark) mean → per-language mean (equal benchmark weight)
+
+### `docs/`
+
+- `docs/flags.md` — compiler flags and build settings for all 18 languages across all 8 benchmarks; derived from CLBG reference implementations
+- `docs/benchmarks/benchmark-analysis.md` — thesis benchmark analysis plan and methodology
+- `docs/benchmarks/<lang>_benchmark_insights.md` — per-language CLBG implementation notes (18 files)
+- `docs/clbg-prompt-template.md` — prompt template for reviewing CLBG implementations
+- `docs/credits.md` — attribution for CLBG source code
 
 ### `green-metrics-tool/`
 
