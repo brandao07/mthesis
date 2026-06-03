@@ -19,6 +19,12 @@
       "skillPath": "foundation/conventional-commits/SKILL.md",
       "computedHash": "1a9b826315006b8bf32126c8391f7f11e8ed090b8506f029ccca165cb4f438dc"
     },
+    "data-science-expert": {
+      "source": "personamanagmentlayer/pcl",
+      "sourceType": "github",
+      "skillPath": "stdlib/ai/data-science-expert/SKILL.md",
+      "computedHash": "d496559694bdff585993b675614d31a91c76e21c1c09b2e79f4a603efe2bddfb"
+    },
     "excalidraw-diagram": {
       "source": "coleam00/excalidraw-diagram-skill",
       "sourceType": "github",
