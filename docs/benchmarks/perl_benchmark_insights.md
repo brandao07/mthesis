@@ -35,7 +35,7 @@
 ---
 
 > **k-nucleotide — Perl**
-> - Execution: interpreted via `perl 5.42.1` (no JIT); invoked as `perl /tmp/repo/benchmarks/perl/k-nucleotide/main.pl 0 < /tmp/repo/inputs/fasta-2500000.txt` (stdin redirect requires `shell: sh`, set at `k-nucleotide.yml:15-16`)
+> - Execution: interpreted via `perl 5.42.1` (no JIT); invoked as `perl /tmp/repo/benchmarks/perl/k-nucleotide/main.pl 0 < /tmp/repo/inputs/fasta-25000000.txt` (stdin redirect requires `shell: sh`, set at `k-nucleotide.yml:15-16`)
 > - Concurrency: **multi-threaded — Perl ithreads**. Uses `use threads` (line 11 of `main.pl`). Thread count is determined by `num_cpus()` (lines 60–65), stored in `$threads` (line 13). For each frame length (1, 2, and each query string), `update_hash_for_frame()` spawns `$threads` worker threads (lines 37–50 of `update_hash_for_frame`) that each process a slice of the sequence. **Scales with CPU count.**
 > - Build/runtime config: no flags passed to `perl`; no CPAN modules; no `setup-commands` in YAML.
 > - Source of flags: `benchmarks/perl/k-nucleotide.yml:15-16` (command + shell), `benchmarks/perl/k-nucleotide/main.pl:11,13` (thread usage and count), `main.pl:37-50,60-65` (thread spawn and cpu detection)
@@ -59,7 +59,7 @@
 ---
 
 > **regex-redux — Perl**
-> - Execution: interpreted via `perl 5.42.1` (no JIT); invoked as `perl /tmp/repo/benchmarks/perl/regex-redux/main.pl 0 < /tmp/repo/inputs/fasta-5000000.txt` (stdin redirect requires `shell: sh`, set at `regex-redux.yml:15-16`)
+> - Execution: interpreted via `perl 5.42.1` (no JIT); invoked as `perl /tmp/repo/benchmarks/perl/regex-redux/main.pl 0 < /tmp/repo/inputs/fasta-25000000.txt` (stdin redirect requires `shell: sh`, set at `regex-redux.yml:15-16`)
 > - Concurrency: **hybrid — fork + Perl ithreads**. Uses `use threads` (line 14 of `main.pl`) and `fork` (line 67). The process forks once (line 67): the **child** spawns `ceil(9/3)` = **3 ithreads** (lines 73–80; `ITEMS_PER_THREAD = 3`, 9 variants / 3 = 3 threads) to count regex matches in parallel, then writes results to a pipe; the **parent** performs the IUB substitutions sequentially while the child works, then reads the child's results from the pipe. Total worker threads (inside child): **3 fixed ithreads**. The fork itself adds 1 additional OS-level process. Thread and fork counts are **fixed**, not CPU-dependent.
 > - Build/runtime config: no flags passed to `perl`; no CPAN modules (uses only built-in `threads` and POSIX `fork`/`pipe`); no `setup-commands` in YAML.
 > - Source of flags: `benchmarks/perl/regex-redux.yml:15-16` (command + shell), `benchmarks/perl/regex-redux/main.pl:14` (thread usage), `main.pl:16` (`ITEMS_PER_THREAD = 3`), `main.pl:67` (fork), `main.pl:73-80` (thread spawn in child)

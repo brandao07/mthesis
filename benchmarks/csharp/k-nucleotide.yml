@@ -16,4 +16,4 @@ flow:
     commands:
       - type: console
         shell: sh
-        command: /tmp/csharp-k-nucleotide 0 < /tmp/repo/inputs/fasta-2500000.txt
+        command: /tmp/csharp-k-nucleotide 0 < /tmp/repo/inputs/fasta-25000000.txt

@@ -32,8 +32,8 @@
 > **K-Nucleotide — Lua**
 > - Execution: Interpreted PUC Lua 5.5 bytecode VM via `lua`; source pre-compiled with `luac` to `/tmp/lua-build/k-nucleotide/knucleotide.lua-2.lua_run`
 > - Concurrency: Single-threaded. Reads the entire input sequence into memory, then performs sequential frequency counting and fragment counting passes. No coroutines, no subprocesses.
-> - Build/runtime config: No runtime flags. `luac` pre-compilation only. Reads from stdin via shell redirect (`< /tmp/repo/inputs/fasta-2500000.txt`), requiring `shell: sh` in the flow.
-> - Source of flags: `benchmarks/lua/k-nucleotide/build_in_tmp.sh:14` (`luac -o knucleotide.lua-2.lua_run knucleotide.lua-2.lua`); `benchmarks/lua/k-nucleotide.yml:18` (`lua /tmp/lua-build/k-nucleotide/knucleotide.lua-2.lua_run 0 < /tmp/repo/inputs/fasta-2500000.txt`)
+> - Build/runtime config: No runtime flags. `luac` pre-compilation only. Reads from stdin via shell redirect (`< /tmp/repo/inputs/fasta-25000000.txt`), requiring `shell: sh` in the flow.
+> - Source of flags: `benchmarks/lua/k-nucleotide/build_in_tmp.sh:14` (`luac -o knucleotide.lua-2.lua_run knucleotide.lua-2.lua`); `benchmarks/lua/k-nucleotide.yml:18` (`lua /tmp/lua-build/k-nucleotide/knucleotide.lua-2.lua_run 0 < /tmp/repo/inputs/fasta-25000000.txt`)
 
 > **Mandelbrot — Lua**
 > - Execution: Interpreted PUC Lua 5.5 bytecode VM via `lua`; source pre-compiled with `luac` to `/tmp/lua-build/mandelbrot/mandelbrot.lua-6.lua_run`

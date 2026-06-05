@@ -13,6 +13,6 @@ flow:
     commands:
       - type: console
         shell: sh
-        command: node /tmp/repo/benchmarks/nodejs/k-nucleotide/main.js < /tmp/repo/inputs/fasta-2500000.txt
+        command: node /tmp/repo/benchmarks/nodejs/k-nucleotide/main.js < /tmp/repo/inputs/fasta-25000000.txt
 
 

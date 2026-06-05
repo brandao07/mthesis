@@ -35,7 +35,7 @@ No `build_in_tmp.sh` is used for any C++ benchmark — all compile flags are inl
 > **K-Nucleotide — C++**
 > - Execution: AOT native binary via `g++ (GCC 15.2.0)` with `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -lpthread`
 > - Concurrency: **Multi-threaded**; uses `std::thread` directly (`<thread>`, `main.cpp:37`). Thread count: compile-time constant `Cfg::thread_count = 4` (`main.cpp:45`). In `CalculateInThreads<size>()`, 4 threads are created and joined; each thread computes hash frequencies on a separate `__gnu_pbds::cc_hash_table` partition, then partial tables are merged on the main thread after join (`main.cpp:152-171`). No SIMD intrinsics in source; compiler may auto-vectorize via `-march=native`.
-> - Build/runtime config: `-O3 -fomit-frame-pointer -march=native -std=c++17 -lpthread`. Uses GCC's policy-based data structure (`__gnu_pbds::cc_hash_table`, `main.cpp:42,121`). Input: `fasta-2500000.txt` via stdin redirect.
+> - Build/runtime config: `-O3 -fomit-frame-pointer -march=native -std=c++17 -lpthread`. Uses GCC's policy-based data structure (`__gnu_pbds::cc_hash_table`, `main.cpp:42,121`). Input: `fasta-25000000.txt` via stdin redirect.
 > - Source of flags: `benchmarks/cpp/k-nucleotide.yml:9`; thread count at `benchmarks/cpp/k-nucleotide/main.cpp:45`; thread launch at `main.cpp:159-162`
 
 ---
@@ -59,7 +59,7 @@ No `build_in_tmp.sh` is used for any C++ benchmark — all compile flags are inl
 > **Regex-Redux — C++**
 > - Execution: AOT native binary via `g++ (GCC 15.2.0)` with `-pipe -O3 -fomit-frame-pointer -march=native -std=c++17 -lpcre2-8 -lpthread`
 > - Concurrency: **Multi-threaded**; uses `std::async(std::launch::async, ...)` backed by `<future>` (`main.cpp:18,296`). In `count_occurrences()`, 9 regex-counting tasks are launched as `std::async(launch_type, ...)` — one per pattern — running concurrently in separate threads (`main.cpp:326-334`). A 10th async task is launched in `main()` to run all 9 counting tasks concurrently with the sequential replacement pipeline (`main.cpp:375-376`). Maximum concurrency: up to 10 simultaneous threads. Uses PCRE2's JIT compilation (`pcre2_jit_compile`, `pcre2_jit_match`) for runtime regex compilation to machine code (`main.cpp:229,199`). Uses `boost::noncopyable` (`main.cpp:15`).
-> - Build/runtime config: `-O3 -fomit-frame-pointer -march=native -std=c++17 -lpcre2-8 -lpthread`. Requires `libboost-dev` (for `boost/noncopyable.hpp`). Input: `fasta-5000000.txt` via stdin redirect. Note: libpcre2 is already present in the base `gcc:15.2.0` image; only `libboost-dev` is installed in `setup-commands`.
+> - Build/runtime config: `-O3 -fomit-frame-pointer -march=native -std=c++17 -lpcre2-8 -lpthread`. Requires `libboost-dev` (for `boost/noncopyable.hpp`). Input: `fasta-25000000.txt` via stdin redirect. Note: libpcre2 is already present in the base `gcc:15.2.0` image; only `libboost-dev` is installed in `setup-commands`.
 > - Source of flags: `benchmarks/cpp/regex-redux.yml:11`; async launch at `benchmarks/cpp/regex-redux/main.cpp:296,330`; PCRE2 JIT at `main.cpp:229`
 
 ---

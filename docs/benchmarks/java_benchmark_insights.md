@@ -52,7 +52,7 @@
   - Requires `fastutil-8.3.1.jar` (downloaded in `k-nucleotide.yml:11` setup-commands; verified present by `build_in_tmp.sh:11–14`).
   - `javac -d . -cp ".:fastutil-8.3.1.jar" Main.java` (`build_in_tmp.sh:18`)
   - `native-image --silent --gc=G1 -cp ".:fastutil-8.3.1.jar" -O3 -march=native Main -o knucleotide.graalvmaot_run` (fallback: `--gc=serial`) (`build_in_tmp.sh:21–23`)
-  - Flow command: `knucleotide.graalvmaot_run 0 < /tmp/repo/inputs/fasta-2500000.txt` (`k-nucleotide.yml:21`)
+  - Flow command: `knucleotide.graalvmaot_run 0 < /tmp/repo/inputs/fasta-25000000.txt` (`k-nucleotide.yml:21`)
 - **Source of flags:** `benchmarks/java/k-nucleotide/build_in_tmp.sh:21–23`
 
 ---
@@ -91,7 +91,7 @@
   - `native-image --silent --gc=G1 -H:+UnlockExperimentalVMOptions -H:+ForeignAPISupport --enable-native-access=ALL-UNNAMED --features=ForeignRegistrationFeature -Djava.library.path=<pcre2_lib_dir> -cp ".:jextract-classes" -O3 -march=native regexredux -o regexredux.graalvmaot-4.graalvmaot_run` (fallback: `--gc=serial`) (`build_in_tmp.sh:66–82`)
   - The `ForeignRegistrationFeature` class (defined in `Main.java:212–268`) registers all PCRE2 downcall descriptors at build time for native-image.
   - PCRE2 patterns are JIT-compiled at runtime via `pcre2_jit_compile_8`. (`Main.java:164–166`)
-  - Flow command: `regexredux.graalvmaot-4.graalvmaot_run 0 < /tmp/repo/inputs/fasta-5000000.txt` (`regex-redux.yml:19`)
+  - Flow command: `regexredux.graalvmaot-4.graalvmaot_run 0 < /tmp/repo/inputs/fasta-25000000.txt` (`regex-redux.yml:19`)
 - **Source of flags:** `benchmarks/java/regex-redux/build_in_tmp.sh:66–82`
 
 ---

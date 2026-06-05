@@ -43,7 +43,7 @@ No extra compiler flags on any benchmark; the `dart compile exe` default optimiz
 
 ## K-Nucleotide — Dart
 
-- **Execution:** AOT via `dart compile exe` (Dart 3.9.4, image `dart:3.9.4-sdk`), no extra flags. Binary invoked as `/tmp/main < /tmp/repo/inputs/fasta-2500000.txt` (stdin redirect, `shell: sh`).
+- **Execution:** AOT via `dart compile exe` (Dart 3.9.4, image `dart:3.9.4-sdk`), no extra flags. Binary invoked as `/tmp/main < /tmp/repo/inputs/fasta-25000000.txt` (stdin redirect, `shell: sh`).
   - Source: `benchmarks/dart/k-nucleotide.yml:9`, `benchmarks/dart/k-nucleotide.yml:17-19`
 - **Concurrency:** Multi-isolate, fixed 3 isolates (not CPU-scaled). Three calls to `par()` each spawn one isolate via `Isolate.spawn(findMultiple, ...)` to compute `find()` results for different k-mer groups (`['GGT','GGTA','GGTATT']`, `['GGTATTTTAATT']`, `['GGTATTTTAATTTATAGT']`) concurrently. `sort()` calls for lengths 1 and 2 run sequentially in the main isolate. Results are awaited via `Completer`-backed `RawReceivePort`.
   - Source: `benchmarks/dart/k-nucleotide/main.dart:144-154`, `main.dart:164-174`, `main.dart:156-162`
@@ -76,7 +76,7 @@ No extra compiler flags on any benchmark; the `dart compile exe` default optimiz
 
 ## Regex-Redux — Dart
 
-- **Execution:** AOT via `dart compile exe` (Dart 3.9.4, image `dart:3.9.4-sdk`), no extra flags. Binary invoked as `/tmp/main < /tmp/repo/inputs/fasta-5000000.txt` (stdin redirect, `shell: sh`).
+- **Execution:** AOT via `dart compile exe` (Dart 3.9.4, image `dart:3.9.4-sdk`), no extra flags. Binary invoked as `/tmp/main < /tmp/repo/inputs/fasta-25000000.txt` (stdin redirect, `shell: sh`).
   - Source: `benchmarks/dart/regex-redux.yml:9`, `benchmarks/dart/regex-redux.yml:17-19`
 - **Concurrency:** Multi-isolate, fixed 1 isolate (not CPU-scaled). One isolate is spawned via `Isolate.spawn(magicReplacements, Data(z, mainIsolate.sendPort))` to perform the 5 sequential regex-replacement passes while the main isolate concurrently counts 9 pattern matches with `printPatternMatches(z)`. Results are combined via a single `ReceivePort` message.
   - Source: `benchmarks/dart/regex-redux/main.dart:17-28`, `main.dart:66-68`

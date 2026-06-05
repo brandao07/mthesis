@@ -37,7 +37,7 @@
 > **K-Nucleotide — Python**
 > - Execution: Interpreted via `python3 -OO` (CPython 3.13 from image `python:3.13-slim`). No compilation step.
 > - Concurrency: Multi-process via `multiprocessing.Pool`. Partitions the input sequence into `n = cpu_count()` equal slices when `len(sequence) > 128 * cpu_count()`, otherwise runs single-process. Uses `pool.starmap_async(lean_call(count_frequencies), lean_jobs)` to distribute frequency counting across workers. A `lean_buffer` global dict avoids re-serializing the large sequence across process boundaries by using a shared-memory key lookup pattern.
-> - Runtime flags: `-OO` (remove assert statements and docstrings). Input is read from stdin (`< /tmp/repo/inputs/fasta-2500000.txt`), requiring `shell: sh` in the flow.
+> - Runtime flags: `-OO` (remove assert statements and docstrings). Input is read from stdin (`< /tmp/repo/inputs/fasta-25000000.txt`), requiring `shell: sh` in the flow.
 > - Source: `benchmarks/python/k-nucleotide/main.py`, `benchmarks/python/k-nucleotide.yml`
 > - Notes: The `lean_buffer` / `lean_call` pattern is a workaround for multiprocessing's pickle-based IPC: the large byte-sequence is stored in a module-level dict by integer key, and only the key is passed to workers. Workers look up the sequence from this shared dict (which is copied into each subprocess on fork on Linux). Worker count equals `cpu_count()`.
 
@@ -58,7 +58,7 @@
 > **Regex-Redux — Python**
 > - Execution: Interpreted via `python3 -OO` (CPython 3.13 from image `python:3.13-slim`). No compilation step.
 > - Concurrency: Multi-process via `multiprocessing.Process`. Spawns one worker process per available CPU (`cpu_count() or 1`). A manager-process/worker-process communication pattern using `multiprocessing.Pipe` and `multiprocessing.connection.wait` distributes the 9 counting tasks across workers and one serial replacement task to worker 0. Workers use PCRE2 via `ctypes` (not Python's `re` module) and call `pcre2_jit_compile_8` on each pattern to enable PCRE2's own JIT for matching.
-> - Runtime flags: `-OO` (remove assert statements and docstrings). Input is read from stdin (`< /tmp/repo/inputs/fasta-5000000.txt`), requiring `shell: sh` in the flow. Requires `libpcre2-8-0` installed via `apt-get` in `setup-commands`.
+> - Runtime flags: `-OO` (remove assert statements and docstrings). Input is read from stdin (`< /tmp/repo/inputs/fasta-25000000.txt`), requiring `shell: sh` in the flow. Requires `libpcre2-8-0` installed via `apt-get` in `setup-commands`.
 > - Source: `benchmarks/python/regex-redux/main.py`, `benchmarks/python/regex-redux.yml`
 > - Notes: This benchmark does not use Python's built-in `re` module at all — PCRE2 is loaded directly via `ctypes.CDLL(find_library("pcre2-8"))`. PCRE2's JIT (`pcre2_jit_compile_8`) runs within the C library; the Python interpreter itself remains unaffected. Shared memory (`RawArray`) is used for the sequences buffer to avoid copying it to each subprocess. Worker count is pinned to `cpu_count()`.
 
@@ -75,8 +75,8 @@
 
 **1. Regex-redux: input file differs between production YAML and cluster-scenario YAML.**
 
-- `benchmarks/python/regex-redux.yml` (production): `< /tmp/repo/inputs/fasta-5000000.txt`
-- `benchmarks/python/gmt-cluster-scenario.yml` (regex-redux flow): `< /tmp/repo/inputs/fasta-2500000.txt`
+- `benchmarks/python/regex-redux.yml` (production): `< /tmp/repo/inputs/fasta-25000000.txt`
+- `benchmarks/python/gmt-cluster-scenario.yml` (regex-redux flow): `< /tmp/repo/inputs/fasta-25000000.txt`
 
 The cluster scenario uses half the input size compared to the standalone production YAML. This is inconsistent — the other per-benchmark YAMLs (binary-trees, fasta, etc.) use the same input sizes in both contexts.
 

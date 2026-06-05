@@ -16,5 +16,5 @@ flow:
     commands:
       - type: console
         shell: sh
-        command: /tmp/fsharp-regex-redux 0 < /tmp/repo/inputs/fasta-5000000.txt
+        command: /tmp/fsharp-regex-redux 0 < /tmp/repo/inputs/fasta-25000000.txt
 

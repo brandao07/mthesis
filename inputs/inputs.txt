@@ -1,8 +1,8 @@
 - binary-trees: 21
 - fannkuch-redux: 12
 - fasta: 25000000
-- k-nucleotide: fasta-2500000.txt
+- k-nucleotide: fasta-25000000.txt
 - mandelbrot: 16000
 - n-body: 50000000
-- regex-redux: fasta-5000000.txt
+- regex-redux: fasta-25000000.txt
 - spectral-norm: 5500

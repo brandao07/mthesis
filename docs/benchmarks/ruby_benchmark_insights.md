@@ -48,7 +48,7 @@
 > - **Build flags:** None (no compilation).
 > - **Runtime flags:** `--yjit -W0` (from `build_in_tmp.sh` wrapper).
 > - **Source:** `benchmarks/ruby/k-nucleotide/build_in_tmp.sh`, `benchmarks/ruby/k-nucleotide.yml`, `benchmarks/ruby/k-nucleotide/main.rb`.
-> - **Notes:** Input is read from `stdin` (`< /tmp/repo/inputs/fasta-2500000.txt`), requiring `shell: sh` in the YAML flow. The full sequence is loaded into the global `$seq` before forking, so all child processes inherit a copy of the data.
+> - **Notes:** Input is read from `stdin` (`< /tmp/repo/inputs/fasta-25000000.txt`), requiring `shell: sh` in the YAML flow. The full sequence is loaded into the global `$seq` before forking, so all child processes inherit a copy of the data.
 
 ---
 
@@ -74,7 +74,7 @@
 
 > **Regex-Redux — Ruby**
 > - **Execution:** JIT via `ruby --yjit -W0` (Ruby 3.4 from image `ruby:3.4`). No compilation step; wrapper generated at setup time by `build_in_tmp.sh`.
-> - **Concurrency:** Multi-process with a Thread-based coordinator. `match_results` spawns 9 `Thread`s (one per matcher in `MATCHERS`). Each thread calls `pattern_count` which is aliased to `forked_pattern_count` on MRI (the alias is applied unconditionally for non-Java platforms at class load time). `forked_pattern_count` calls `Process.fork` to run the actual scan in a child process and reads the result back through a pipe. This produces 9 threads × 9 forked child processes running concurrently. Fixed at 9 workers; does not scale with CPU count. Input is read from `stdin` (`< /tmp/repo/inputs/fasta-5000000.txt`), requiring `shell: sh` in the YAML flow.
+> - **Concurrency:** Multi-process with a Thread-based coordinator. `match_results` spawns 9 `Thread`s (one per matcher in `MATCHERS`). Each thread calls `pattern_count` which is aliased to `forked_pattern_count` on MRI (the alias is applied unconditionally for non-Java platforms at class load time). `forked_pattern_count` calls `Process.fork` to run the actual scan in a child process and reads the result back through a pipe. This produces 9 threads × 9 forked child processes running concurrently. Fixed at 9 workers; does not scale with CPU count. Input is read from `stdin` (`< /tmp/repo/inputs/fasta-25000000.txt`), requiring `shell: sh` in the YAML flow.
 > - **Build flags:** None (no compilation).
 > - **Runtime flags:** `--yjit -W0` (from `build_in_tmp.sh` wrapper).
 > - **Source:** `benchmarks/ruby/regex-redux/build_in_tmp.sh`, `benchmarks/ruby/regex-redux.yml`, `benchmarks/ruby/regex-redux/main.rb`.

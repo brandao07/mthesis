@@ -46,7 +46,7 @@ All benchmarks are AOT-compiled inside the container via `go build` with no extr
 
 ## k-nucleotide — Go
 
-- **Execution:** AOT via `go build` (Go 1.25), no extra flags. Command: `go build -o /tmp/go-k-nucleotide /tmp/repo/benchmarks/go/k-nucleotide/main.go`. Run: `/tmp/go-k-nucleotide < /tmp/repo/inputs/fasta-2500000.txt` (stdin redirect).
+- **Execution:** AOT via `go build` (Go 1.25), no extra flags. Command: `go build -o /tmp/go-k-nucleotide /tmp/repo/benchmarks/go/k-nucleotide/main.go`. Run: `/tmp/go-k-nucleotide < /tmp/repo/inputs/fasta-25000000.txt` (stdin redirect).
   - Source: `k-nucleotide.yml:9`, `k-nucleotide.yml:17–18`
 - **Concurrency:** Multi-goroutine scaling with CPU count. `startCount32` and `startCount64` each spawn exactly `runtime.NumCPU()` goroutines, one per logical CPU, coordinated via `sync.WaitGroup`. Each goroutine processes a strided partition of the data (offset `begin`, stride `goroutineCount`), building an independent local map; results are merged serially after `wg.Wait()`. `runtime.GOMAXPROCS` is not set explicitly — defaults to `runtime.NumCPU()` (Go runtime default).
   - Source: `k-nucleotide/main.go:144–172`, `k-nucleotide/main.go:204–253`
@@ -82,7 +82,7 @@ All benchmarks are AOT-compiled inside the container via `go build` with no extr
 
 ## regex-redux — Go
 
-- **Execution:** AOT via `go build` (Go 1.25), no extra build flags beyond module setup. Build is more complex: `apk add gcc musl-dev pcre-dev` → `go mod init regex-redux` → `go get github.com/GRbit/go-pcre@v1.0.0` → `go build -o /tmp/go-regex-redux .` (builds module directory, not a single file). Run: `/tmp/go-regex-redux < /tmp/repo/inputs/fasta-5000000.txt` (stdin redirect).
+- **Execution:** AOT via `go build` (Go 1.25), no extra build flags beyond module setup. Build is more complex: `apk add gcc musl-dev pcre-dev` → `go mod init regex-redux` → `go get github.com/GRbit/go-pcre@v1.0.0` → `go build -o /tmp/go-regex-redux .` (builds module directory, not a single file). Run: `/tmp/go-regex-redux < /tmp/repo/inputs/fasta-25000000.txt` (stdin redirect).
   - Source: `regex-redux.yml:10–12`, `regex-redux.yml:20–21`
 - **Concurrency:** Multi-goroutine with **`GOMAXPROCS` set to `runtime.NumCPU()`**. Nine match-counting goroutines are launched simultaneously (one per variant pattern), each writing its result to a dedicated `chan int`. One additional goroutine handles all five sequential substitutions and sends final length to `lenresult chan int`. Total: 10 concurrent goroutines plus main. Main goroutine collects results in order. Parallelism scales with CPU count (GOMAXPROCS = NumCPU).
   - Source: `regex-redux/main.go:61`, `regex-redux/main.go:77–95`

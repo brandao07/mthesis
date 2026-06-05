@@ -36,7 +36,7 @@
 > **K-Nucleotide — Erlang**
 > - Execution: BEAM bytecode via `erlc` (no extra compile flags), run on BEAM VM with BeamAsm JIT (OTP 29.0.0)
 > - Concurrency: **Multi-process.** `do/2` at `knucleotide.erl:63` calls `spawn/1` to create one worker process per Action entry. Seven actions are defined at `knucleotide.erl:81–87`; therefore 7 worker processes are spawned concurrently. Workers use ETS hash tables and communicate results via message passing using a token-passing chain (`hd(Pids) ! tl(Pids) ++ [self()]` at `knucleotide.erl:91`) to enforce ordered printing. BEAM SMP schedulers run the workers across available cores.
-> - Build/runtime config: Compile — `erlc /tmp/repo/benchmarks/erlang/k-nucleotide/knucleotide.erl` (no extra flags). Runtime — `erl -pa /tmp/repo/benchmarks/erlang/k-nucleotide -noshell -smp enable -run knucleotide main dummy < /tmp/repo/inputs/fasta-2500000.txt` (stdin redirect requires `shell: sh`)
+> - Build/runtime config: Compile — `erlc /tmp/repo/benchmarks/erlang/k-nucleotide/knucleotide.erl` (no extra flags). Runtime — `erl -pa /tmp/repo/benchmarks/erlang/k-nucleotide -noshell -smp enable -run knucleotide main dummy < /tmp/repo/inputs/fasta-25000000.txt` (stdin redirect requires `shell: sh`)
 > - Source of flags: `k-nucleotide.yml:9` (compile), `k-nucleotide.yml:18` (runtime)
 
 ---
@@ -60,7 +60,7 @@
 > **Regex-Redux — Erlang**
 > - Execution: BEAM bytecode via `erlc` (no extra compile flags), run on BEAM VM with BeamAsm JIT (OTP 29.0.0). Source carries `-compile([native, {hipe, [o3]}])` at `regexredux.erl:22`, which is a no-op under OTP 26+ (HiPE removed); BeamAsm JIT handles native compilation instead.
 > - Concurrency: **Multi-process.** `work/1` at `regexredux.erl:36` spawns one `spawn_link` worker process per regex pattern via `matcher/4` closures (`regexredux.erl:45–47`). Nine patterns are defined at `regexredux.erl:80–87`, so 9 matcher processes run concurrently plus an initial `Worker = spawn_link(fun () -> work(S) end)` at `regexredux.erl:32`. BEAM SMP schedulers dispatch matchers across available cores. Results are collected in order via `results/1` at `regexredux.erl:75–77`. A `spawn_link` is used rather than `spawn`, so crashes propagate to the supervisor.
-> - Build/runtime config: Compile — `erlc /tmp/repo/benchmarks/erlang/regex-redux/regexredux.erl` (no extra flags). Runtime — `erl -pa /tmp/repo/benchmarks/erlang/regex-redux -noshell -noinput -smp enable -run regexredux main 0 < /tmp/repo/inputs/fasta-5000000.txt`. Note `-noinput` is present here (in addition to `-noshell`) — this is the only benchmark with both flags.
+> - Build/runtime config: Compile — `erlc /tmp/repo/benchmarks/erlang/regex-redux/regexredux.erl` (no extra flags). Runtime — `erl -pa /tmp/repo/benchmarks/erlang/regex-redux -noshell -noinput -smp enable -run regexredux main 0 < /tmp/repo/inputs/fasta-25000000.txt`. Note `-noinput` is present here (in addition to `-noshell`) — this is the only benchmark with both flags.
 > - Source of flags: `regex-redux.yml:9` (compile), `regex-redux.yml:18` (runtime), `regexredux.erl:22` (source directive)
 
 ---

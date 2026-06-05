@@ -17,5 +17,5 @@ flow:
     commands:
       - type: console
         shell: sh
-        command: /tmp/php-regex-redux < /tmp/repo/inputs/fasta-5000000.txt
+        command: /tmp/php-regex-redux < /tmp/repo/inputs/fasta-25000000.txt
 

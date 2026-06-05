@@ -41,7 +41,7 @@
 > **K-Nucleotide — OCaml**
 > - Execution: AOT native via `opam exec -- ocamlopt` (OCaml 5.4) with `-noassert -unsafe -fPIC -nodynlink -inline 100 -O3 -I +unix unix.cmxa -ccopt -march=native`
 > - Concurrency: **Multi-process via Unix `fork`**. The `invoke` helper (`k-nucleotide/main.ml:199–215`) uses `Unix.fork()` with a `Unix.pipe()` and `Marshal` for IPC, identical in structure to binary-trees. The `parallelize` function (`main.ml:217–219`) maps `invoke` over 7 tasks (2 frequency counts + 5 specific sequence counts, `main.ml:222–233`), launching up to 7 child processes in parallel. Each child exits after writing its result; the parent collects in order. Task count (7) is fixed, not CPU-scaled.
-> - Build/runtime config: compile flags from `k-nucleotide/build_in_tmp.sh:9–19`; reads from stdin (`fasta-2500000.txt` piped in, `k-nucleotide.yml:18`); linked against `unix.cmxa`; binary at `/tmp/ocaml-k-nucleotide`.
+> - Build/runtime config: compile flags from `k-nucleotide/build_in_tmp.sh:9–19`; reads from stdin (`fasta-25000000.txt` piped in, `k-nucleotide.yml:18`); linked against `unix.cmxa`; binary at `/tmp/ocaml-k-nucleotide`.
 > - Source of flags: `benchmarks/ocaml/k-nucleotide/build_in_tmp.sh:9–19`
 >
 > Note: Uses custom hashtables (`Hashtbl.Make`) with bit-packed integer keys for performance. No SIMD.
@@ -71,7 +71,7 @@
 > **Regex-Redux — OCaml**
 > - Execution: AOT native via `opam exec -- ocamlfind ocamlopt` (OCaml 5.4) with `-noassert -unsafe -fPIC -nodynlink -inline 100 -O3 -package <re|re.pcre> -package unix -linkpkg -ccopt -march=native`
 > - Concurrency: **Two processes via Unix `fork`** (`regex-redux/main.ml:50`). A single `Unix.fork()` splits execution: the child process iterates over 9 variant patterns counting matches (`main.ml:51–52`), while the parent process performs 5 substitution passes (`main.ml:54–58`). The parent then calls `Unix.wait()` (`main.ml:59`) and prints the final lengths. Fixed 2-process split (parent + 1 child), not CPU-scaled.
-> - Build/runtime config: uses `ocamlfind ocamlopt` instead of bare `ocamlopt` to resolve the `re` package; `re` package installed at container startup via `opam install -y ocamlfind re` (`regex-redux.yml:10`); build script probes for `re.pcre` first and falls back to `re` (`regex-redux/build_in_tmp.sh:14–17`); both `re`/`re.pcre` and `unix` linked via `-linkpkg`; reads from stdin (`fasta-5000000.txt`, `regex-redux.yml:20`); binary at `/tmp/ocaml-regex-redux`.
+> - Build/runtime config: uses `ocamlfind ocamlopt` instead of bare `ocamlopt` to resolve the `re` package; `re` package installed at container startup via `opam install -y ocamlfind re` (`regex-redux.yml:10`); build script probes for `re.pcre` first and falls back to `re` (`regex-redux/build_in_tmp.sh:14–17`); both `re`/`re.pcre` and `unix` linked via `-linkpkg`; reads from stdin (`fasta-25000000.txt`, `regex-redux.yml:20`); binary at `/tmp/ocaml-regex-redux`.
 > - Source of flags: `benchmarks/ocaml/regex-redux/build_in_tmp.sh:19–31`
 >
 > Note: Unlike all other benchmarks, uses `ocamlfind` (package manager integration) and does NOT use `-I +unix unix.cmxa` directly — unix is resolved through `ocamlfind -package unix -linkpkg`. The `re` library is a pure-OCaml regex engine with PCRE syntax support (not the C PCRE2 library used by C/Rust benchmarks).

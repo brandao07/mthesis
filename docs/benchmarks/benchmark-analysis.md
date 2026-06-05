@@ -368,8 +368,8 @@ omitted.
 ### Python
 
 1. **regex-redux: input file differs between production YAML and cluster-scenario YAML:**
-   `benchmarks/python/regex-redux.yml` uses `fasta-5000000.txt`; the regex-redux flow in
-   `gmt-cluster-scenario.yml` uses `fasta-2500000.txt` (half the input size). Inconsistent
+   `benchmarks/python/regex-redux.yml` uses `fasta-25000000.txt`; the regex-redux flow in
+   `gmt-cluster-scenario.yml` uses `fasta-25000000.txt` (half the input size). Inconsistent
    with all other benchmarks which use the same input in both contexts.
 
 2. **flags.md does not document the `-OO` flag:** Applied to all 8 Python benchmarks. It

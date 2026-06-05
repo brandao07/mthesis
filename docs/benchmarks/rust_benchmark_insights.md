@@ -34,7 +34,7 @@
 ---
 
 > **K-Nucleotide — Rust**
-> - Execution: AOT via `cargo build --release --locked --offline` (Rust 1.93, `rust:1.93-alpine`). Binary copied to `/tmp/rust-k-nucleotide`. Run: `k-nucleotide < /tmp/repo/inputs/fasta-2500000.txt`.
+> - Execution: AOT via `cargo build --release --locked --offline` (Rust 1.93, `rust:1.93-alpine`). Binary copied to `/tmp/rust-k-nucleotide`. Run: `k-nucleotide < /tmp/repo/inputs/fasta-25000000.txt`.
 > - Concurrency: **Multi-threaded** via `tokio-threadpool`. The `calc` function creates a `ThreadPool` (sized to the Tokio default, which follows the number of logical CPUs) and submits 7 independent frequency-counting tasks as futures using `pool.spawn_handle(lazy(...))`, then waits on them sequentially. Each task calls `freq()` single-threadedly. No SIMD intrinsics in source.
 > - Build/runtime config: `RUSTFLAGS="-C opt-level=3 -C target-cpu=native -C codegen-units=1"`. Crates: `futures = "0.1"` (future combinators), `tokio-threadpool = "0.1"` (thread pool executor), `itertools = "0.14"` (sorted_by for output), `num = "0.4"` (numeric traits `FromPrimitive`/`ToPrimitive`), `hashbrown = "0.15"` (hash map). Cargo edition 2021.
 > - Source of flags: `benchmarks/rust/k-nucleotide/build_in_tmp.sh:18`, crates at `benchmarks/rust/k-nucleotide/Cargo.toml:11-15`, thread pool at `benchmarks/rust/k-nucleotide/main.rs:159,169-175`.
@@ -58,7 +58,7 @@
 ---
 
 > **Regex-Redux — Rust**
-> - Execution: AOT via `cargo build --release --locked --offline` (Rust 1.93, `rust:1.93-alpine`). Binary copied to `/tmp/rust-regex-redux`. Run: `regex-redux < /tmp/repo/inputs/fasta-5000000.txt`. Requires host packages `pcre2-dev pkgconf` (installed at setup).
+> - Execution: AOT via `cargo build --release --locked --offline` (Rust 1.93, `rust:1.93-alpine`). Binary copied to `/tmp/rust-regex-redux`. Run: `regex-redux < /tmp/repo/inputs/fasta-25000000.txt`. Requires host packages `pcre2-dev pkgconf` (installed at setup).
 > - Concurrency: **Multi-threaded** via `rayon`. `rayon::scope` spawns 3 parallel tasks: (1) reading stdin and stripping headers, (2) computing substitution sequence length, (3) counting reverse complement variants. Within `count_reverse_complements`, a `variants.into_par_iter()` distributes the 9 regex patterns across rayon's thread pool. Rayon uses its default work-stealing pool (logical CPU count). No `std::arch` SIMD intrinsics in source (PCRE2's own JIT handles pattern matching efficiently via the `pcre2_jit_compile_8`/`pcre2_jit_match_8` FFI path).
 > - Build/runtime config: `RUSTFLAGS="-C opt-level=3 -C target-cpu=native -C codegen-units=1"`. Crates: `rayon = "1"`, `libc = "0.2"` (ioctl/FIONREAD for stdin size hint), `pcre2-sys = "0.2"` (raw FFI bindings to libpcre2-8). Cargo edition 2021.
 > - Source of flags: `benchmarks/rust/regex-redux/build_in_tmp.sh:18`, crates at `benchmarks/rust/regex-redux/Cargo.toml:11-13`, rayon at `benchmarks/rust/regex-redux/main.rs:320-351,268-275`, pcre2 JIT at `main.rs:107,132`.

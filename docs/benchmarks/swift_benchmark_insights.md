@@ -42,7 +42,7 @@
 > **K-Nucleotide — Swift**
 > - Execution: AOT via `swiftc` (Swift 6.0.3) with `-Ounchecked -wmo`
 > - Concurrency: **Multi-threaded** via `DispatchQueue.concurrentPerform(iterations: ntasks)` inside `getSequenceHash` (line 52), where `ntasks = 8` (line 14, hardcoded). Each of the 8 parallel workers builds a local `[Int:Int]` dictionary for its slice of the sequence, then merges it into a shared dictionary via a serial `mQueue.sync` critical section. Called multiple times (for k=1,2,3,4,6,12,18), always with 8 concurrent tasks. Thread count: GCD global pool, bounded logically by the hardcoded 8 iterations.
-> - Build/runtime config: `-Ounchecked -wmo`, compiled from `benchmarks/swift/k-nucleotide/main.swift` to `/tmp/swift-k-nucleotide`; run with stdin from `/tmp/repo/inputs/fasta-2500000.txt` and argument `0`.
+> - Build/runtime config: `-Ounchecked -wmo`, compiled from `benchmarks/swift/k-nucleotide/main.swift` to `/tmp/swift-k-nucleotide`; run with stdin from `/tmp/repo/inputs/fasta-25000000.txt` and argument `0`.
 > - Source of flags: `benchmarks/swift/k-nucleotide.yml:9`
 > - Source concurrency: `benchmarks/swift/k-nucleotide/main.swift:14` (`ntasks = 8`), `52` (`DispatchQueue.concurrentPerform`), `17–18` (queue declarations)
 
@@ -73,7 +73,7 @@
 > - Execution: AOT via `swiftc` (Swift 6.0.3) with `-Ounchecked -wmo`
 > - Concurrency: **Multi-threaded** via `DispatchQueue.global().async` + `DispatchGroup`. One background task computes the replacement result length (line 30–42) concurrently with nine tasks (one per variant pattern, lines 58–65) that count pattern matches in parallel. All tasks are joined via `group.wait()` (line 67). Thread count: GCD global pool, up to 10 concurrent tasks.
 > - Regex engine: uses **`NSRegularExpression`** (ICU-based; part of Foundation on Linux). No PCRE2. Sequence stripping is done with `replacingOccurrences(of:options:.regularExpression)` (line 20–21) on the main thread before dispatching concurrent work.
-> - Build/runtime config: `-Ounchecked -wmo`, compiled from `benchmarks/swift/regex-redux/main.swift` to `/tmp/regexredux.swift-4.swift_run`; run with stdin from `/tmp/repo/inputs/fasta-5000000.txt` and argument `0`.
+> - Build/runtime config: `-Ounchecked -wmo`, compiled from `benchmarks/swift/regex-redux/main.swift` to `/tmp/regexredux.swift-4.swift_run`; run with stdin from `/tmp/repo/inputs/fasta-25000000.txt` and argument `0`.
 > - Source of flags: `benchmarks/swift/regex-redux.yml:9`
 > - Source concurrency: `benchmarks/swift/regex-redux/main.swift:27–67` (`DispatchGroup`, `DispatchQueue.global().async`)
 

@@ -60,7 +60,7 @@
 >   - `-XScopedTypeVariables`: enables scoped type variables
 >   - `-package ghc-compact`: referenced in compile flags but `ghc-compact` package is NOT used in the source (`main.hs` does not import `GHC.Compact`). This is a stale flag (no effect; compile succeeds because the package exists).
 >   - RTS: `+RTS -N4 -K2048M -RTS` — 4 threads, 2048 MB stack limit (deep recursion in `countOccurrences`/`go`)
->   - Benchmark input: `< /tmp/repo/inputs/fasta-2500000.txt` (measure), `< /tmp/repo/inputs/fasta-100.txt` (test)
+>   - Benchmark input: `< /tmp/repo/inputs/fasta-25000000.txt` (measure), `< /tmp/repo/inputs/fasta-100.txt` (test)
 > - **Source of flags:** `k-nucleotide.yml:14` (compile), `k-nucleotide.yml:23` (RTS)
 
 ---
@@ -102,7 +102,7 @@
 >   - `-lpcre2-8`: links the PCRE2 native library
 >   - Uses PCRE2 JIT (`c_pcre2_jit_compile`, `c_pcre2_jit_match` — line 40 marked `unsafe` for extra FFI performance)
 >   - RTS: `+RTS -N4 -H250M -RTS` — 4 threads, 250 MB initial heap allocation hint
->   - Benchmark input: `< /tmp/repo/inputs/fasta-5000000.txt` (measure), `< /tmp/repo/inputs/fasta-100.txt` (test)
+>   - Benchmark input: `< /tmp/repo/inputs/fasta-25000000.txt` (measure), `< /tmp/repo/inputs/fasta-100.txt` (test)
 > - **Source of flags:** `regex-redux.yml:14` (compile), `regex-redux.yml:23` (RTS)
 
 ---

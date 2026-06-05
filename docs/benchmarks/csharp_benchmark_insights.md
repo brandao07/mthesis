@@ -37,7 +37,7 @@
 ---
 
 > **K-Nucleotide — C#**
-> - Execution: AOT via NativeAOT (.NET 9.0); binary at `/tmp/csharp-k-nucleotide`; takes FASTA input via stdin (`< /tmp/repo/inputs/fasta-2500000.txt`). (`k-nucleotide.yml:19`)
+> - Execution: AOT via NativeAOT (.NET 9.0); binary at `/tmp/csharp-k-nucleotide`; takes FASTA input via stdin (`< /tmp/repo/inputs/fasta-25000000.txt`). (`k-nucleotide.yml:19`)
 > - Concurrency: **Multi-threaded** via `Task.Run` and `Parallel.ForEach`. Input blocks are decoded in parallel via `Parallel.ForEach(threeBlocks, ...)` (`main.cs:190`). Seven counting tasks are launched concurrently with `Task.Run` (`main.cs:196–202`), each scanning the full dataset for a different k-mer length. Tasks run on the default ThreadPool, scaling with CPU count.
 > - Build/runtime config: Identical shared settings **plus** a NuGet package reference: `Microsoft.Experimental.Collections` version `1.0.6-e190117-3` (for `DictionarySlim<TKey,TValue>`). This is the only benchmark with a per-benchmark csproj addition. (`build_common.sh:68–74`)
 > - Source of flags: `benchmarks/csharp/build_common.sh:48–78`
@@ -64,7 +64,7 @@
 ---
 
 > **Regex-Redux — C#**
-> - Execution: AOT via NativeAOT (.NET 9.0); binary at `/tmp/csharp-regex-redux`; takes FASTA input via stdin (`< /tmp/repo/inputs/fasta-5000000.txt`). (`regex-redux.yml:21`)
+> - Execution: AOT via NativeAOT (.NET 9.0); binary at `/tmp/csharp-regex-redux`; takes FASTA input via stdin (`< /tmp/repo/inputs/fasta-25000000.txt`). (`regex-redux.yml:21`)
 > - Concurrency: **Multi-threaded** via `Task.Run` and PLINQ (`AsParallel`). The substitution chain runs in a background `Task.Run` (`main.cs:27–38`). The 9 match-counting regex queries run via `regexes.AsParallel().AsOrdered()` (`main.cs:53`). Both paths run on the ThreadPool, scaling with CPU count.
 > - Build/runtime config: Identical shared settings. Additionally requires `libpcre2-8` installed at build time (`regex-redux.yml:11`). The C# `Pcre` class wraps the native `pcre2-8` library via P/Invoke (`DllImport("pcre2-8", ...)`) with JIT compilation of patterns (`main.cs:100`, `main.cs:142–164`). `AllowUnsafeBlocks=true` is required for the `unsafe` pointer operations in `Replace` and `Exec` (`main.cs:122–130`, `main.cs:134–138`).
 > - Source of flags: `benchmarks/csharp/build_common.sh:48–78`; extra dep: `regex-redux.yml:11`

@@ -41,7 +41,7 @@
 
 **k-nucleotide — C**
 
-- **Execution:** AOT via `gcc 15.2.0` with `-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp`; runtime invocation: `/tmp/main < /tmp/repo/inputs/fasta-2500000.txt` (stdin redirect, `shell: sh` required).
+- **Execution:** AOT via `gcc 15.2.0` with `-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp`; runtime invocation: `/tmp/main < /tmp/repo/inputs/fasta-25000000.txt` (stdin redirect, `shell: sh` required).
 - **Concurrency:** Multi-threaded via OpenMP. `#pragma omp parallel sections` at `main.c:215` dispatches 7 independent tasks — 5 exact oligonucleotide count queries and 2 frequency-generation passes — each as a separate `#pragma omp section`. Thread count defaults to OpenMP runtime (scales with CPU count). Sections are data-independent (read-only shared `polynucleotide` array; each section writes to its own `output_Buffer[i]` slot).
 - **Build/runtime config:** `-O3`; `-fomit-frame-pointer`; `-march=native`; `-fopenmp`. Uses bundled `khash.h` header-only hash table (`benchmarks/c/k-nucleotide/khash.h`); custom hash function `CUSTOM_HASH_FUNCTION` overrides default khash hash at `main.c:21`. No dynamic library installs needed beyond `libgomp` (bundled with GCC). No extra `-l` flags.
 - **Source of flags:** `benchmarks/c/k-nucleotide.yml:9` (compile command); `benchmarks/c/k-nucleotide/main.c:215` (OpenMP parallel sections pragma).
@@ -68,7 +68,7 @@
 
 **regex-redux — C**
 
-- **Execution:** AOT via `gcc 15.2.0` with `-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp -lpcre2-8`; runtime invocation: `/tmp/main < /tmp/repo/inputs/fasta-5000000.txt` (stdin redirect, `shell: sh` required).
+- **Execution:** AOT via `gcc 15.2.0` with `-pipe -Wall -O3 -fomit-frame-pointer -march=native -fopenmp -lpcre2-8`; runtime invocation: `/tmp/main < /tmp/repo/inputs/fasta-25000000.txt` (stdin redirect, `shell: sh` required).
 - **Concurrency:** Multi-threaded via OpenMP. `#pragma omp parallel` at `main.c:109` creates a thread team. `#pragma omp single` at `main.c:119` has one thread perform the initial input stripping (sequential dependency). `#pragma omp single nowait` at `main.c:129` has one thread run all 5 replacement passes serially. `#pragma omp for schedule(dynamic) ordered` at `main.c:173` distributes the 9 counting patterns across threads, with `#pragma omp ordered` at `main.c:199` ensuring ordered output. Thread count scales with OpenMP runtime default (CPU count). Each thread has its own `pcre2_match_context`, `pcre2_jit_stack`, and `pcre2_match_data` to avoid contention.
 - **Build/runtime config:** `-O3`; `-fomit-frame-pointer`; `-march=native`; `-fopenmp`; `-lpcre2-8` links PCRE2. PCRE2's JIT is used explicitly: `pcre2_jit_compile(regex, PCRE2_JIT_COMPLETE)` at `main.c:34` and `pcre2_jit_match` at `main.c:38`. `pcre2.h` is bundled in `benchmarks/c/regex-redux/` (not installed via apt-get). **Discrepancy: flags.md notes `libpcre2-dev` is required, but the YAML has no `apt-get install` step** — PCRE2 is available in the `gcc:15.2.0` image or the header is bundled and the `.so` is present without an explicit install step.
 - **Source of flags:** `benchmarks/c/regex-redux.yml:9` (compile command); `benchmarks/c/regex-redux/main.c:109,119,129,173,199` (OpenMP pragmas); `benchmarks/c/regex-redux/main.c:34,38` (PCRE2 JIT).

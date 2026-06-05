@@ -39,7 +39,7 @@ Source of shared build config: `benchmarks/fsharp/build_common.sh:48–76`
 ---
 
 > **k-nucleotide — F#**
-> - **Execution:** JIT via CLR (.NET 9.0, `dotnet build`). Output: `/tmp/fsharp-k-nucleotide` shell wrapper. Canonical run: reads from `fasta-2500000.txt` via stdin. Extra NuGet dependency: `Microsoft.Experimental.Collections` 1.0.6-e190117-3 (`DictionarySlim`).
+> - **Execution:** JIT via CLR (.NET 9.0, `dotnet build`). Output: `/tmp/fsharp-k-nucleotide` shell wrapper. Canonical run: reads from `fasta-25000000.txt` via stdin. Extra NuGet dependency: `Microsoft.Experimental.Collections` 1.0.6-e190117-3 (`DictionarySlim`).
 > - **Concurrency:** Multi-threaded via F# `Async.Parallel`. Seven async computations are composed via `Async.Parallel` at `main.fs:200–209`, each independently counting or computing frequency tables for different k-mer lengths (1, 2, 3, 4, 6, 12, 18). Additionally, inside `count64`, four sub-tasks per computation run in parallel (`Seq.init 4 (fun i -> async { ... }) |> Async.Parallel`, `main.fs:181–184`). Also uses `Array.Parallel.iter` to map DNA byte encoding across input blocks (`main.fs:98–101`). Thread count: pool-managed, effectively up to `4 × outer_tasks` concurrent async operations.
 > - **Build/runtime config:** `ServerGarbageCollection=true`, `ConcurrentGarbageCollection=true`. Extra `<PackageReference Include="Microsoft.Experimental.Collections" Version="1.0.6-e190117-3" />` in generated `.fsproj` (`build_common.sh:63–69`). `setup_dependencies.sh` pre-restores this NuGet package into `/tmp/nuget-packages` before build.
 > - **Source of flags:** `build_common.sh:48–76`, NuGet section `build_common.sh:63–69`; concurrency: `k-nucleotide/main.fs:98–101, 181–184, 200–209`; YML: `k-nucleotide.yml:18–19`.
@@ -63,7 +63,7 @@ Source of shared build config: `benchmarks/fsharp/build_common.sh:48–76`
 ---
 
 > **regex-redux — F#**
-> - **Execution:** JIT via CLR (.NET 9.0, `dotnet build`). Output: `/tmp/fsharp-regex-redux` shell wrapper. Canonical run: reads from `fasta-5000000.txt` via stdin, extra arg `0`. Test run: same with smaller input.
+> - **Execution:** JIT via CLR (.NET 9.0, `dotnet build`). Output: `/tmp/fsharp-regex-redux` shell wrapper. Canonical run: reads from `fasta-25000000.txt` via stdin, extra arg `0`. Test run: same with smaller input.
 > - **Concurrency:** Multi-threaded via F# `Async.Parallel`. Ten async computations (one `replaceTask` + nine `regexCount` pattern-match tasks) are composed with `Async.Parallel` + `Async.RunSynchronously` (`regex-redux/main.fs:38–51`). Each async task compiles and runs its own `Regex` instance independently. Thread count: CLR thread pool managed, up to 10 concurrent.
 > - **Build/runtime config:** `ServerGarbageCollection=true`, `ConcurrentGarbageCollection=true`. Uses `System.Text.RegularExpressions.Regex` with `RegexOptions.Compiled` (JIT-compiles regex to IL at runtime, on top of CLR JIT). No external regex library (unlike C/C++ which use PCRE2). `setup_dependencies.sh` called at setup.
 > - **Source of flags:** `build_common.sh:48–76`; concurrency: `regex-redux/main.fs:38–51`; YML: `regex-redux.yml:18–19`.
