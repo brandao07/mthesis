@@ -300,6 +300,13 @@ build_provider_skip_flags() {
   return 0
 }
 
+generate_inputs() {
+  local script="${SCRIPT_DIR}/generate_inputs.sh"
+  [ -f "$script" ] || die "generate_inputs.sh not found at: $script"
+  log "Generating benchmark input files..."
+  bash "$script"
+}
+
 run_gmt_install_best_effort() {
   local db_password
   db_password="$(read_env_default "DATABASE_PASSWORD" "$KWA_ENV_EXAMPLE")"
@@ -408,6 +415,7 @@ main() {
   ensure_go_version
   ensure_gmt_checkout
   run_gmt_install_best_effort
+  generate_inputs
   print_summary
 }
 
