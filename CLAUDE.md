@@ -131,6 +131,7 @@ via `plot_style.load_runs()` — no inline outlier removal.
 - `02_energy_analysis_v2.ipynb` — CPU + memory energy boxplots, paradigm violin plots, Kruskal-Wallis + Mann-Whitney U + Bonferroni + rank-biserial, per-benchmark heatmap, efficiency ranking
 - `03_time_analysis_v2.ipynb` — execution time boxplots (log scale), Spearman correlations, paradigm speed comparison, EDP ranking
 - `04_comparative_v2.ipynb` — normalized ranking table (ratio vs best language), multi-metric ranking (mean of benchmark means, sorted by EDP rank), normalised heatmap, top3/bottom3, key findings; exports `outputs/ranking_summary.csv`
+- `05_per_benchmark_v2.ipynb` — per-(benchmark × language) mean breakdown: 3 small-multiples figures (CPU energy, DRAM energy, execution time), each an 8-panel grid (one per benchmark) of value-labelled, paradigm-coloured language bars
 
 **v2 key conventions:**
 - Thesis figures exported as 300-dpi vector PDF to `notebooks/figures/` (gitignored) via `plot_style.save_fig()`
