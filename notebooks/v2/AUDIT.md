@@ -209,7 +209,21 @@ Everything in **v1/02** and most of **v1/11** retires.
 
 ---
 
-## 5. Decisions I need from you before Phase 1
+## 5. Decisions — RESOLVED ✅ (approved 2026-06-10)
+
+1. **Retire `v1/02_visualization` entirely** — yes (delete the notebook).
+2. **Collapse `v1/11` to the startup-overhead figure only** — yes.
+3. **Per-paradigm split boxplots** (v2/02 c5,c8; v2/03 c5) — **CUT** (redundant).
+4. **CO₂ carbon scatter** (v2/02 c20–21) — **CUT** for now.
+5. **Radar chart** (v2/04 c8–9) — **CUT**.
+6. **nb01 clean-run-count bar** (c8) — **CUT**.
+7. **time-vs-mem scatter** (v2/03 c9) — **KEEP**.
+8. No further removals.
+
+Also decided for Phase 1/2: `plot_style.py` lives at `notebooks/plot_style.py`;
+v2 notebooks are **hand-edited directly** and `generate_notebooks.py` is retired.
+
+### Original questions (for the record)
 
 1. **Retire `v1/02_visualization` entirely?** (Y / keep the per-benchmark grid-bars
    only / keep whole notebook.)
