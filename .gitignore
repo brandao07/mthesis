@@ -23,3 +23,4 @@ green-metrics-tool
 /notebooks/outputs
 /notebooks/v2/figures
 /notebooks/v2/outputs
+/notebooks/__pycache__
