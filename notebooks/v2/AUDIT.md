@@ -1,8 +1,8 @@
 # Notebook Audit — Phase 0
 
-> **Status:** proposal awaiting review. Nothing is deleted yet. Every `CUT` /
-> `MERGE` below is a suggestion tied to my reading of the figures, not a decision.
-> Approve / amend the consolidated cut-list (§5) before I touch any notebook.
+> **Status: COMPLETE.** Cut-list approved (§5) and applied. Phase 1 (plot_style),
+> Phase 2 (per-notebook refactor) and Phase 3 (verify) are done — see §7 for the
+> Phase 3 verification report.
 
 Scope (confirmed): **all 7 notebooks** —
 `01_data_cleaning`, `02_visualization`, `11_disk_io_deep_dive` (v1, in `notebooks/`)
@@ -248,3 +248,37 @@ a 2-line `sys.path` shim, since the generator already writes into `v2/` and it k
 the module next to its primary consumers. It will expose: `apply_style()`,
 `PARADIGM_COLORS` (Okabe–Ito), `LANGUAGE_ORDER`, `PARADIGM`, `LANG_DISPLAY`,
 `MEANPROPS`, `save_fig(fig, name)` (→ 300-dpi vector PDF), and the `COL_*` constants.
+
+---
+
+## 7. Phase 3 — Verification report
+
+**Headless execution:** all 6 surviving notebooks run top-to-bottom with no errors
+(`jupyter nbconvert --execute`): `01_data_cleaning`, `11_disk_io_deep_dive`,
+`v2/01`–`v2/04`.
+
+**Figures exported:** 17 thesis figures, all 300-dpi **vector PDF** in
+`notebooks/figures/` (gitignored). Contact sheet at
+`notebooks/figures/_contact_sheet.png` (regenerate from the executed notebooks'
+inline PNG outputs).
+
+**Consistency after refactor:**
+- ✅ One shared style module (`notebooks/plot_style.py`) imported by every notebook;
+  zero inline palette/rcParams duplication.
+- ✅ Single Okabe–Ito paradigm palette everywhere (AOT blue / JIT orange /
+  Interpreted green); colourblind- and grayscale-safe.
+- ✅ Paradigm **membership** now canonical everywhere — fixed the nb11 bug that
+  grouped Lua as JIT and dropped F#.
+- ✅ All figures titled, axis-labelled with units (J / ms / MB), and meaningfully
+  sorted (by mean) or in canonical order.
+- ✅ Each figure has a one-line takeaway markdown cell.
+- ✅ Fixed a leftover palette collision: the v2/02 stacked total-energy bar used the
+  old blue/red; recoloured to a neutral grey + vermillion component pair.
+
+**Known minor items (left as-is, within spec):**
+- Horizontal bar charts (rankings, EDP, startup overhead) inherit the global
+  **y-only** grid from `apply_style()`; only the startup chart adds an explicit
+  x-grid. The Appendix-B style spec mandates a y-only grid, so this is compliant,
+  though an x-grid would marginally aid value reading on `barh` charts.
+- Figure **titles** are descriptive ("CPU Energy by Language…") rather than
+  takeaway-phrased; the takeaway is carried by the markdown cell beneath each figure.
