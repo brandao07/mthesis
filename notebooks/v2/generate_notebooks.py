@@ -81,20 +81,17 @@ _LOAD_AND_CONVERT = """\
 #   - Outliers removed per (language × benchmark) group, IQR fence on CPU energy + time
 #   - Units already converted (J, ms, g, MB, W)
 #
-# Two data grains:
-#   df       = results_clean_runs.csv — per-run rows. Used ONLY for the distribution
-#              views (boxplots/violins) and the non-parametric tests, which need the
-#              raw samples.
-#   df_mean  = results_clean.csv — mean per (language × benchmark) cell. This is the
-#              building block for the two-step mean: averaging the 8 cell-means per
-#              language gives an equal-weight-per-benchmark ranking. ALL rankings,
-#              heatmaps and summary tables are computed from df_mean.
+# Single source: results_clean_runs.csv — per-run rows.
+#   df       = all per-run rows, used for distribution views and non-parametric tests.
+#   df_mean  = per-(language × benchmark) mean, computed here from df.
+#              Rankings, heatmaps and summary tables use df_mean via lang_means().
 df = pd.read_csv('../../results/results_clean_runs.csv')
 df['language'] = df['language'].replace(LANG_DISPLAY)
 df['paradigm'] = df['language'].map(PARADIGM)
 
-df_mean = pd.read_csv('../../results/results_clean.csv')
-df_mean['language'] = df_mean['language'].replace(LANG_DISPLAY)
+_id_cols = {'run_id', 'measured_at', 'language', 'benchmark', 'paradigm'}
+_metric_cols = [c for c in df.columns if c not in _id_cols]
+df_mean = df.groupby(['language', 'benchmark'])[_metric_cols].mean().reset_index()
 df_mean['paradigm'] = df_mean['language'].map(PARADIGM)
 
 # Energy-Delay Product from representative (mean) values per cell: lower is better.
@@ -105,7 +102,7 @@ df_mean['EDP'] = (df_mean[COL_CPU_ENERGY] + df_mean[COL_MEM_ENERGY]) * df_mean[C
 def lang_means(cols):
     \"\"\"Per-language two-step mean for column(s) `cols` (str or list): average the
     per-benchmark cell means with equal benchmark weight. Returns a Series for a
-    single column or a DataFrame for a list. Sourced from df_mean (results_clean.csv).\"\"\"
+    single column or a DataFrame for a list. Derived from results_clean_runs.csv.\"\"\"
     return df_mean.groupby('language')[cols].mean()
 
 
