@@ -213,7 +213,8 @@ Everything in **v1/02** and most of **v1/11** retires.
 
 1. **Retire `v1/02_visualization` entirely** — yes (delete the notebook).
 2. **Collapse `v1/11` to the startup-overhead figure only** — yes.
-3. **Per-paradigm split boxplots** (v2/02 c5,c8; v2/03 c5) — **CUT** (redundant).
+3. **Per-paradigm split boxplots** (v2/02 c5,c8; v2/03 c5) — ~~CUT~~ → **REINSTATED**
+   later by request (CPU + DRAM in v2/02, execution time on log scale in v2/03).
 4. **CO₂ carbon scatter** (v2/02 c20–21) — **CUT** for now.
 5. **Radar chart** (v2/04 c8–9) — **CUT**.
 6. **nb01 clean-run-count bar** (c8) — **CUT**.
