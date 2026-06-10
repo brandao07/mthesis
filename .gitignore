@@ -19,5 +19,7 @@ green-metrics-tool
 /results/figs/
 /results/results_clean.csv
 /results/results_clean_runs.csv
+/notebooks/figures
+/notebooks/outputs
 /notebooks/v2/figures
 /notebooks/v2/outputs
