@@ -30,6 +30,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import matplotlib as mpl
+import matplotlib.colors as mcolors
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -213,18 +215,33 @@ def add_takeaway(fig, text: str):
              fontsize=9, style="italic", color="#555555", wrap=True)
 
 
-def styled_table_fig(df, title, fname, highlight_col=None, figsize=None):
+def _tint(hexc, amt=0.82):
+    """Mix a hex colour toward white by `amt` (0 = full colour, 1 = white).
+
+    Input: a colour spec and a blend amount. Returns an (r, g, b) tuple. Used to
+    make paradigm-coloured table rows light enough to keep black text readable.
+    """
+    r, g, b = mcolors.to_rgb(hexc)
+    return (r + (1 - r) * amt, g + (1 - g) * amt, b + (1 - b) * amt)
+
+
+def styled_table_fig(df, title, fname, highlight_col=None, row_paradigms=None,
+                     figsize=None):
     """Render a DataFrame as a styled table FIGURE for slides/reports.
 
-    Behaviour: draws `df` as a matplotlib table with a dark header, zebra-striped
-    rows, the DataFrame index shown as the leading column, and an optional
-    `highlight_col` tinted green to draw the eye. Cells are rendered with str(),
-    so pass a display-formatted frame (numbers already formatted as strings).
+    Behaviour: draws `df` as a matplotlib table with a dark header, the DataFrame
+    index shown as the leading column, and one of two row colourings:
+    - if `row_paradigms` is given (a list of paradigm names, one per row in df
+      order), each row is tinted by its paradigm colour and a paradigm legend is
+      added below the table;
+    - otherwise rows are zebra-striped.
+    An optional `highlight_col` is tinted green on top of either scheme. Cells are
+    rendered with str(), so pass a display-formatted frame (numbers as strings).
 
-    Inputs: a DataFrame (its index becomes the first column), a title string, a
-    save_fig basename, an optional column label to highlight, and an optional
-    figsize. Outputs: saves a 300-dpi vector PDF *and* a PNG (slide-friendly) via
-    save_fig and returns the matplotlib Figure. Side effect: writes two files.
+    Inputs: a DataFrame (index → first column), a title, a save_fig basename, an
+    optional column label to highlight, an optional per-row paradigm list, and an
+    optional figsize. Outputs: saves a 300-dpi vector PDF *and* a PNG via save_fig
+    and returns the Figure. Side effect: writes two files.
     """
     disp = df.reset_index()
     col_labels = [str(c) for c in disp.columns]
@@ -255,10 +272,18 @@ def styled_table_fig(df, title, fname, highlight_col=None, figsize=None):
             if j == hl:
                 cell.set_facecolor("#e3f1ea")
                 cell.set_text_props(fontweight="bold", color="#1a7a4c")
+            elif row_paradigms is not None:
+                cell.set_facecolor(_tint(PARADIGM_COLORS[row_paradigms[i - 1]]))
             else:
                 cell.set_facecolor("#f7f8f9" if i % 2 == 0 else "white")
             if j == 0:
                 cell.set_text_props(fontweight="bold")
+
+    if row_paradigms is not None:                 # paradigm legend below the table
+        handles = [mpatches.Patch(color=PARADIGM_COLORS[p], label=p, alpha=0.85)
+                   for p in PARADIGM_ORDER]
+        ax.legend(handles=handles, title="Paradigm", loc="lower center",
+                  bbox_to_anchor=(0.5, -0.04), ncol=len(PARADIGM_ORDER), frameon=True)
 
     if title:
         ax.set_title(title, fontsize=12, pad=14, fontweight="bold")
