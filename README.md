@@ -20,14 +20,16 @@ and the measurements are exported, cleaned, and analysed into per-language resul
 | Paradigm    | Languages |
 |-------------|-----------|
 | AOT         | C, C++, C#, Dart, Go, Haskell, Java, OCaml, Rust, Swift |
-| JIT / VM    | Erlang, F#, JavaScript (Node.js), PHP, Ruby |
-| Interpreted | Lua, Perl, Python |
+| JIT / VM    | Erlang, F#, JavaScript (Node.js), Ruby |
+| Interpreted | Lua, Perl, PHP, Python |
 
 **Benchmarks:** `binary-trees`, `fannkuch-redux`, `fasta`, `k-nucleotide`, `mandelbrot`,
 `n-body`, `regex-redux`, `spectral-norm`.
 
 > Java uses GraalVM Native Image (AOT). C# and F# compile with .NET 9 Native AOT; F# is
-> grouped under JIT/VM because it targets the .NET runtime ecosystem. See
+> grouped under JIT/VM because it targets the .NET runtime ecosystem. PHP is grouped under
+> Interpreted (CLBG convention): its wrappers load OPcache with a JIT buffer but never set
+> the `opcache.jit` mode, so JIT stays off and runs execute on the Zend VM. See
 > [`docs/flags.md`](docs/flags.md) for the per-language compiler flags and build settings.
 
 ## Repository Layout
