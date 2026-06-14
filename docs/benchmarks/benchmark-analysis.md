@@ -3,8 +3,8 @@
 | Compilation Type | Languages |
 |-----------------|-----------|
 | AOT | C, C++, C#, Dart, Go, Haskell, Java, OCaml, Rust, Swift |
-| JIT | Erlang, F#, Node.js, PHP, Ruby |
-| Interpreted | Lua, Perl, Python |
+| JIT | Erlang, F#, Node.js, Ruby |
+| Interpreted | Lua, Perl, PHP, Python |
 
 ---
 
@@ -43,7 +43,7 @@ read alongside them, not instead of them.
 | NodeJS | JIT (V8/TurboFan) | Node.js 25 | None | worker_threads (7/8 benchmarks); single-threaded for n-body | Mixed | V8 JIT warmup applies; fasta/k-nucleotide fixed at 4 workers; mandelbrot/fannkuch-redux/spectral-norm scale with os.cpus().length; regex-redux uses only 1 worker |
 | OCaml | AOT (ocamlopt native) | OCaml 5.4 | `-noassert -unsafe -O3 -inline 100 -ccopt -march=native` | Unix fork (most benchmarks); single-threaded (fasta, n-body, spectral-norm) | No (fixed fork counts) | Uses no Domains or Threads; fan-out sizes: k-nucleotide=7, binary-trees=varies by depth, fankkuch-redux=32, mandelbrot=64; regex-redux=2; uses pure-OCaml `re` library not PCRE2 |
 | Perl | Interpreted (opcode tree, no JIT) | Perl 5.42.1 (threaded build) | None | Perl ithreads (use threads) or fork+ithreads (regex-redux) | Mixed | fasta/n-body single-threaded; binary-trees/k-nucleotide/mandelbrot/spectral-norm scale with `/proc/cpuinfo`; fannkuch-redux fixed at 12 threads (= input N) |
-| PHP | JIT (OPcache JIT, 64M buffer) with interpreted fallback | PHP 8.4 | `-dzend_extension=opcache.so -dopcache.enable_cli=1 -dopcache.jit_buffer_size=64M -n` | pcntl_fork multi-process with shmop/sysvmsg/pipe IPC | Mixed | fasta/n-body single-process; fannkuch-redux/mandelbrot=2×CPU forks; k-nucleotide=6 fixed; regex-redux=4 fixed; spectral-norm=1×CPU forks |
+| PHP | Interpreted (Zend VM + OPcache opcode cache; JIT off — `opcache.jit` mode never set, so the 64M buffer is unused) | PHP 8.4 | `-dzend_extension=opcache.so -dopcache.enable_cli=1 -dopcache.jit_buffer_size=64M -n` | pcntl_fork multi-process with shmop/sysvmsg/pipe IPC | Mixed | fasta/n-body single-process; fannkuch-redux/mandelbrot=2×CPU forks; k-nucleotide=6 fixed; regex-redux=4 fixed; spectral-norm=1×CPU forks |
 | Python | Interpreted (CPython bytecode, no JIT) | CPython 3.13 | `-OO` | multiprocessing (separate OS processes, bypasses GIL) | Mixed | No JIT; spectral-norm hardcoded at 4 workers; n-body single-threaded; regex-redux uses PCRE2 via ctypes (not Python re module) |
 | Ruby | JIT (YJIT) | Ruby 3.4 | `--yjit -W0` | Process.fork (MiniParallel CPU-scaled or fixed Worker class) | Mixed | YJIT warmup applies; fasta/n-body single-process; k-nucleotide=7 fixed forks; spectral-norm=6 fixed forks; regex-redux=9 Thread+fork hybrid |
 | Rust | AOT (cargo/rustc) | Rust 1.93 | `-C opt-level=3 -C target-cpu=native -C codegen-units=1` (most) | rayon work-stealing (most); std::thread (fasta); tokio-threadpool (k-nucleotide) | Yes (rayon defaults to all logical CPUs) | n-body single-threaded with explicit AVX/AVX2 intrinsics (no Cargo); binary-trees/fannkuch-redux use `target-cpu=ivybridge` not `native` |

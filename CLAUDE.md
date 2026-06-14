@@ -43,12 +43,14 @@ jupyter lab
 | Paradigm    | Languages |
 |-------------|-----------|
 | AOT         | C, C++, C#, Dart, Go, Haskell, Java, OCaml, Rust, Swift |
-| JIT/VM      | Erlang, F#, JavaScript (Node.js), PHP, Ruby |
-| Interpreted | Lua, Perl, Python |
+| JIT/VM      | Erlang, F#, JavaScript (Node.js), Ruby |
+| Interpreted | Lua, Perl, PHP, Python |
 
 > **Note on Java:** All Java benchmarks use **GraalVM Native Image** (AOT) via `ghcr.io/graalvm/native-image-community:23.0.2`. The community image only supports Serial GC — G1GC requires GraalVM Enterprise.
 >
 > **Note on F# and C#:** Benchmarks compile with `dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishAot=true` using .NET 9 Native AOT. F# is classified as JIT because it targets the .NET runtime/CLR ecosystem despite AOT compilation here.
+>
+> **Note on PHP:** PHP is classified as **Interpreted** to match the CLBG convention. The benchmark wrappers load OPcache with `-dopcache.jit_buffer_size=64M`, but never set the `opcache.jit` mode flag — so JIT stays **off** (verified: `opcache_get_status()` reports `jit.on = false`, `buffer_size = 0`) and runs execute on the Zend VM with opcode caching only.
 
 ## Architecture
 

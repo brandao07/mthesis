@@ -62,11 +62,14 @@ LANG_DISPLAY = {
 
 # Display name → execution paradigm. Canonical classification (matches CLAUDE.md);
 # note Lua is Interpreted and F# is JIT — this fixes the nb11 mis-grouping.
+# PHP is Interpreted: although the wrappers load OPcache with a JIT buffer, the
+# `opcache.jit` mode was never set, so JIT stayed off and runs executed on the
+# Zend VM (opcode cache only) — matching the CLBG classification.
 PARADIGM = {
     "C": "AOT", "C++": "AOT", "C#": "AOT", "Dart": "AOT", "Go": "AOT",
     "Haskell": "AOT", "Java": "AOT", "OCaml": "AOT", "Rust": "AOT", "Swift": "AOT",
-    "Erlang": "JIT", "F#": "JIT", "JavaScript": "JIT", "PHP": "JIT", "Ruby": "JIT",
-    "Lua": "Interpreted", "Perl": "Interpreted", "Python": "Interpreted",
+    "Erlang": "JIT", "F#": "JIT", "JavaScript": "JIT", "Ruby": "JIT",
+    "Lua": "Interpreted", "Perl": "Interpreted", "PHP": "Interpreted", "Python": "Interpreted",
 }
 
 PARADIGM_ORDER = ["AOT", "JIT", "Interpreted"]
