@@ -1,8 +1,8 @@
 """Canonical plotting style for all thesis notebooks (v1 in notebooks/, v2 in
 notebooks/v2/).
 
-Single source of truth for: matplotlib rcParams, the paradigm colour palette
-(Okabe–Ito, colourblind- and grayscale-safe), language/paradigm metadata, the
+Single source of truth for: matplotlib rcParams, the compiler colour palette
+(Okabe–Ito, colourblind- and grayscale-safe), language/compiler metadata, the
 measurement column names, and figure export.
 
 Usage from a notebook::
@@ -13,13 +13,13 @@ Usage from a notebook::
     sys.path.append(str(pathlib.Path.cwd()))           # notebooks/ (v1)
     import plot_style as ps
     ps.apply_style()
-    df = ps.load_runs()                 # per-run frame, display names + paradigm
+    df = ps.load_runs()                 # per-run frame, display names + compiler
     df_mean = ps.cell_means(df)         # per-(language × benchmark) means + EDP
     ...
     ps.save_fig(fig, "02_cpu_energy_ranking")
 
 Design notes:
-- Colour is assigned by **paradigm** (3 hues), never 18 per-language hues.
+- Colour is assigned by **compiler** (3 hues), never 18 per-language hues.
 - `save_fig` always writes a 300-dpi **vector PDF** into a single shared
   `figures/` directory (next to this module) so cross-notebook figures collect
   in one place for the Phase 3 contact sheet.
@@ -50,7 +50,7 @@ COL_MEM_CARBON = "memory_carbon_rapl_msr_component-dram_0-g"
 
 ALPHA = 0.05  # significance level for the non-parametric tests
 
-# ── Language / paradigm metadata ───────────────────────────────────────────────
+# ── Language / compiler metadata ───────────────────────────────────────────────
 # Raw csv code → thesis display name.
 LANG_DISPLAY = {
     "c": "C", "cpp": "C++", "csharp": "C#", "fsharp": "F#",
@@ -60,33 +60,33 @@ LANG_DISPLAY = {
     "python": "Python", "ruby": "Ruby", "rust": "Rust", "swift": "Swift",
 }
 
-# Display name → execution paradigm. Canonical classification (matches CLAUDE.md);
+# Display name → execution compiler. Canonical classification (matches CLAUDE.md);
 # note Lua is Interpreted and F# is JIT — this fixes the nb11 mis-grouping.
 # PHP is Interpreted: although the wrappers load OPcache with a JIT buffer, the
 # `opcache.jit` mode was never set, so JIT stayed off and runs executed on the
 # Zend VM (opcode cache only) — matching the CLBG classification.
-PARADIGM = {
+COMPILER = {
     "C": "AOT", "C++": "AOT", "C#": "AOT", "Dart": "AOT", "Go": "AOT",
     "Haskell": "AOT", "Java": "AOT", "OCaml": "AOT", "Rust": "AOT", "Swift": "AOT",
     "Erlang": "JIT", "F#": "JIT", "JavaScript": "JIT", "Ruby": "JIT",
     "Lua": "Interpreted", "Perl": "Interpreted", "PHP": "Interpreted", "Python": "Interpreted",
 }
 
-PARADIGM_ORDER = ["AOT", "JIT", "Interpreted"]
+COMPILER_ORDER = ["AOT", "JIT", "Interpreted"]
 
 # Okabe–Ito palette — colourblind-safe and distinguishable in grayscale.
-PARADIGM_COLORS = {
+COMPILER_COLORS = {
     "AOT": "#0072B2",          # blue
     "JIT": "#E69F00",          # orange
     "Interpreted": "#009E73",  # bluish green
 }
 
-# Canonical language order: grouped by paradigm, alphabetical within group.
+# Canonical language order: grouped by compiler, alphabetical within group.
 # Use for plots that want a fixed order; value-sorted plots sort by value instead.
 LANGUAGE_ORDER = (
-    sorted(l for l, p in PARADIGM.items() if p == "AOT")
-    + sorted(l for l, p in PARADIGM.items() if p == "JIT")
-    + sorted(l for l, p in PARADIGM.items() if p == "Interpreted")
+    sorted(l for l, p in COMPILER.items() if p == "AOT")
+    + sorted(l for l, p in COMPILER.items() if p == "JIT")
+    + sorted(l for l, p in COMPILER.items() if p == "Interpreted")
 )
 
 # Marker style for the mean (▲) overlaid on boxplots/violins (showmeans=True).
@@ -128,26 +128,26 @@ def apply_style():
     })
 
 
-def paradigm_color(language: str) -> str:
-    """Return the Okabe–Ito colour for a language's paradigm.
+def compiler_color(language: str) -> str:
+    """Return the Okabe–Ito colour for a language's compiler.
 
     Input: a display-name language (e.g. "Rust"). Returns the hex colour string.
     Raises KeyError if the language is unknown — surfacing a typo rather than
     silently mis-colouring.
     """
-    return PARADIGM_COLORS[PARADIGM[language]]
+    return COMPILER_COLORS[COMPILER[language]]
 
 
-def paradigm_handles(alpha: float = 0.85):
-    """Return matplotlib legend handles (one patch per paradigm, in canonical
-    order) for a paradigm-coloured plot.
+def compiler_handles(alpha: float = 0.85):
+    """Return matplotlib legend handles (one patch per compiler, in canonical
+    order) for a compiler-coloured plot.
 
     Input: optional patch alpha. Returns a list of mpatches.Patch suitable for
     ax.legend(handles=...). No side effects.
     """
     import matplotlib.patches as mpatches
-    return [mpatches.Patch(color=PARADIGM_COLORS[p], label=p, alpha=alpha)
-            for p in PARADIGM_ORDER]
+    return [mpatches.Patch(color=COMPILER_COLORS[p], label=p, alpha=alpha)
+            for p in COMPILER_ORDER]
 
 
 # ── Data loading ────────────────────────────────────────────────────────────────
@@ -155,13 +155,13 @@ def load_runs(csv_path: Path | str | None = None) -> pd.DataFrame:
     """Load the per-run cleaned dataset (single source of truth).
 
     Reads results_clean_runs.csv (default: the repo's results/ copy), maps raw
-    language codes to display names, and adds a 'paradigm' column. Returns the
+    language codes to display names, and adds a 'compiler' column. Returns the
     per-run DataFrame. Raises FileNotFoundError if the csv is missing.
     """
     path = Path(csv_path) if csv_path is not None else RESULTS_RUNS_CSV
     df = pd.read_csv(path)
     df["language"] = df["language"].replace(LANG_DISPLAY)
-    df["paradigm"] = df["language"].map(PARADIGM)
+    df["compiler"] = df["language"].map(COMPILER)
     return df
 
 
@@ -169,14 +169,14 @@ def cell_means(df: pd.DataFrame) -> pd.DataFrame:
     """Compute the per-(language × benchmark) cell means from a per-run frame.
 
     Input: the per-run DataFrame from load_runs(). Averages every numeric metric
-    column within each (language, benchmark) cell, re-attaches 'paradigm', and
+    column within each (language, benchmark) cell, re-attaches 'compiler', and
     adds an 'EDP' column = (CPU + Memory energy) × time (J·ms). Returns the
     144-row cell-mean DataFrame. This is the building block for the two-step mean.
     """
-    id_cols = {"run_id", "measured_at", "language", "benchmark", "paradigm"}
+    id_cols = {"run_id", "measured_at", "language", "benchmark", "compiler"}
     metric_cols = [c for c in df.columns if c not in id_cols]
     out = df.groupby(["language", "benchmark"])[metric_cols].mean().reset_index()
-    out["paradigm"] = out["language"].map(PARADIGM)
+    out["compiler"] = out["language"].map(COMPILER)
     out["EDP"] = (out[COL_CPU_ENERGY] + out[COL_MEM_ENERGY]) * out[COL_TIME]
     return out
 
@@ -222,27 +222,27 @@ def _tint(hexc, amt=0.82):
     """Mix a hex colour toward white by `amt` (0 = full colour, 1 = white).
 
     Input: a colour spec and a blend amount. Returns an (r, g, b) tuple. Used to
-    make paradigm-coloured table rows light enough to keep black text readable.
+    make compiler-coloured table rows light enough to keep black text readable.
     """
     r, g, b = mcolors.to_rgb(hexc)
     return (r + (1 - r) * amt, g + (1 - g) * amt, b + (1 - b) * amt)
 
 
-def styled_table_fig(df, title, fname, highlight_col=None, row_paradigms=None,
+def styled_table_fig(df, title, fname, highlight_col=None, row_compilers=None,
                      figsize=None):
     """Render a DataFrame as a styled table FIGURE for slides/reports.
 
     Behaviour: draws `df` as a matplotlib table with a dark header, the DataFrame
     index shown as the leading column, and one of two row colourings:
-    - if `row_paradigms` is given (a list of paradigm names, one per row in df
-      order), each row is tinted by its paradigm colour and a paradigm legend is
+    - if `row_compilers` is given (a list of compiler names, one per row in df
+      order), each row is tinted by its compiler colour and a compiler legend is
       added below the table;
     - otherwise rows are zebra-striped.
     An optional `highlight_col` is tinted green on top of either scheme. Cells are
     rendered with str(), so pass a display-formatted frame (numbers as strings).
 
     Inputs: a DataFrame (index → first column), a title, a save_fig basename, an
-    optional column label to highlight, an optional per-row paradigm list, and an
+    optional column label to highlight, an optional per-row compiler list, and an
     optional figsize. Outputs: saves a 300-dpi vector PDF *and* a PNG via save_fig
     and returns the Figure. Side effect: writes two files.
     """
@@ -275,18 +275,18 @@ def styled_table_fig(df, title, fname, highlight_col=None, row_paradigms=None,
             if j == hl:
                 cell.set_facecolor("#e3f1ea")
                 cell.set_text_props(fontweight="bold", color="#1a7a4c")
-            elif row_paradigms is not None:
-                cell.set_facecolor(_tint(PARADIGM_COLORS[row_paradigms[i - 1]]))
+            elif row_compilers is not None:
+                cell.set_facecolor(_tint(COMPILER_COLORS[row_compilers[i - 1]]))
             else:
                 cell.set_facecolor("#f7f8f9" if i % 2 == 0 else "white")
             if j == 0:
                 cell.set_text_props(fontweight="bold")
 
-    if row_paradigms is not None:                 # paradigm legend below the table
-        handles = [mpatches.Patch(color=PARADIGM_COLORS[p], label=p, alpha=0.85)
-                   for p in PARADIGM_ORDER]
-        ax.legend(handles=handles, title="Paradigm", loc="lower center",
-                  bbox_to_anchor=(0.5, -0.04), ncol=len(PARADIGM_ORDER), frameon=True)
+    if row_compilers is not None:                 # compiler legend below the table
+        handles = [mpatches.Patch(color=COMPILER_COLORS[p], label=p, alpha=0.85)
+                   for p in COMPILER_ORDER]
+        ax.legend(handles=handles, title="Compiler", loc="lower center",
+                  bbox_to_anchor=(0.5, -0.04), ncol=len(COMPILER_ORDER), frameon=True)
 
     if title:
         ax.set_title(title, fontsize=12, pad=14, fontweight="bold")

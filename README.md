@@ -10,14 +10,14 @@ This README only describes **what the repository contains and how to run it.**
 
 ## Overview
 
-The project measures **18 programming languages**, grouped into **3 execution paradigms**,
+The project measures **18 programming languages**, grouped into **3 execution compilers**,
 on **8 core benchmarks** from the
 [Computer Language Benchmarks Game](https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html)
 (CLBG). Energy and performance are measured by the
 [Green Metrics Tool](https://github.com/green-coding-solutions/green-metrics-tool) (GMT),
 and the measurements are exported, cleaned, and analysed into per-language results.
 
-| Paradigm    | Languages |
+| Compiler    | Languages |
 |-------------|-----------|
 | AOT         | C, C++, C#, Dart, Go, Haskell, Java, OCaml, Rust, Swift |
 | JIT / VM    | Erlang, F#, JavaScript (Node.js), Ruby |

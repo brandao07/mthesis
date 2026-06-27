@@ -16,17 +16,17 @@ that generator, then a regenerate. v1 notebooks are hand-edited directly.
 
 ## 1. Cross-cutting findings (the consistency problems Phase 1 must fix)
 
-### 1a. Three different paradigm colour palettes, none colourblind-safe
+### 1a. Three different compiler colour palettes, none colourblind-safe
 | Source | AOT | JIT/VM | Interpreted |
 |--------|-----|--------|-------------|
-| `v2/*` (`PARADIGM_COLORS`) | `#2980b9` | `#e67e22` | `#27ae60` |
+| `v2/*` (`COMPILER_COLORS`) | `#2980b9` | `#e67e22` | `#27ae60` |
 | `v1/02` ranking-table tiers | `#d6eaf8` | `#fdebd0` | `#fdedec` (pastel) |
 | `v1/11` startup-overhead tiers | `#4c9be8` | `#f5a623` | `#e85454` |
 | **Plan target (Okabe–Ito)** | `#0072B2` | `#E69F00` | `#009E73` |
 
 → Phase 1 collapses all of these to the single Okabe–Ito set in `plot_style.py`.
 
-### 1b. Paradigm **membership** disagrees between notebooks (a real bug, not just colour)
+### 1b. Compiler **membership** disagrees between notebooks (a real bug, not just colour)
 - Canonical (CLAUDE.md, `v2/*`, `v1/02`): JIT = {Erlang, F#, JavaScript, PHP, Ruby};
   Interpreted = {Lua, Perl, Python}.
 - **`v1/11` cell[22]** uses JIT = {Erlang, JavaScript, Ruby, PHP, **Lua**};
@@ -43,7 +43,7 @@ that generator, then a regenerate. v1 notebooks are hand-edited directly.
 - `v2/*`: `sns.set_theme("whitegrid")` + dpi 150, no font family.
 - `v1/02`, `v1/11`: serif font, dpi 150/300, manual `rcParams`.
 - No shared module — every notebook redefines `LANG_DISPLAY` and (v2) the full
-  `PARADIGM` / `PARADIGM_COLORS` / `MEANPROPS` block inline.
+  `COMPILER` / `COMPILER_COLORS` / `MEANPROPS` block inline.
 
 ### 1e. Heavy figure duplication v1 ↔ v2 (see matrix §2)
 `v1/02_visualization` is **almost entirely superseded** by `v2/02`+`v2/03`+`v2/04`:
@@ -61,7 +61,7 @@ not prefixed/numbered. Phase 1 `save_fig()` should impose a consistent scheme
 
 | Figure / claim | v1 location | v2 location | Proposal |
 |---|---|---|---|
-| CPU-energy ranking (bar) | `02` cell[10],[18] | `02` cell[19] | keep v2 (two-step mean, paradigm-coloured); CUT v1 |
+| CPU-energy ranking (bar) | `02` cell[10],[18] | `02` cell[19] | keep v2 (two-step mean, compiler-coloured); CUT v1 |
 | Per-benchmark CPU/mem energy heatmap | `02` cell[8] | `02` cell[16] | keep v2; CUT v1 |
 | Per-benchmark **time** heatmap | `02` cell[8] | `03` cell[15] | keep v2; CUT v1 |
 | Energy-vs-time scatter | `02` cell[12] | `03` cell[7] | keep v2; CUT v1 |
@@ -129,10 +129,10 @@ Plan hint: *"only Runtime startup disk overhead is expected to survive."*
 | 16–17 | md+fig | disk writes (all) | writes negligible | **CUT?** | confirms a non-finding |
 | 18–20 | md+code+fig | summary table reads/writes | — | **CUT?** | |
 | 21 | md | startup overhead intro | — | KEEP | |
-| 22 | code+fig | **runtime startup disk overhead per language** | runtime load cost | **KEEP** ⭐ | the surviving figure; **fix paradigm mis-grouping (§1b) + palette** |
+| 22 | code+fig | **runtime startup disk overhead per language** | runtime load cost | **KEEP** ⭐ | the surviving figure; **fix compiler mis-grouping (§1b) + palette** |
 
 > Net proposal for `v1/11`: collapse to load + the single startup-overhead figure
-> (with corrected paradigm grouping). Everything else CUT pending your confirmation.
+> (with corrected compiler grouping). Everything else CUT pending your confirmation.
 
 ### `notebooks/v2/01_data_profiling_v2.ipynb`
 | # | type | produces | question | KEEP/MERGE/CUT | reason |
@@ -153,12 +153,12 @@ Plan hint: *"only Runtime startup disk overhead is expected to survive."*
 | 0 | md | purpose/methodology | — | MERGE | fix stale "results_clean.csv" ref |
 | 1–2 | code | imports+constants+load | — | MERGE→`plot_style` | |
 | 3–4 | md+fig | CPU energy boxplot, all langs, sorted by mean | most efficient? | KEEP | |
-| 5 | fig | CPU energy boxplots split per paradigm | within-paradigm spread | KEEP/**DECIDE** | possibly redundant w/ cell4 |
+| 5 | fig | CPU energy boxplots split per compiler | within-compiler spread | KEEP/**DECIDE** | possibly redundant w/ cell4 |
 | 6–7 | md+fig | Memory energy boxplot, all langs | mem ranking | KEEP | |
-| 8 | fig | Memory energy per-paradigm split | spread | KEEP/**DECIDE** | same redundancy Q as cell5 |
+| 8 | fig | Memory energy per-compiler split | spread | KEEP/**DECIDE** | same redundancy Q as cell5 |
 | 9–10 | md+fig | stacked total energy | CPU vs mem share | KEEP | |
 | 11 | fig | CPU-vs-mem scatter | which dominates | KEEP | |
-| 12–13 | md+fig | energy violins by paradigm | paradigm distribution | KEEP | |
+| 12–13 | md+fig | energy violins by compiler | compiler distribution | KEEP | |
 | 14 | code | KW + MWU + rank-biserial prints | significance | KEEP | stats (no fig) |
 | 15–16 | md+fig | per-benchmark CPU+mem heatmap | per-cell intensity | KEEP | |
 | 17–18 | md+code | efficiency ranking table | ranking | KEEP | |
@@ -171,10 +171,10 @@ Plan hint: *"only Runtime startup disk overhead is expected to survive."*
 | 0 | md | purpose | — | MERGE | fix stale csv ref |
 | 1–2 | code | setup | — | MERGE→`plot_style` | |
 | 3–4 | md+fig | time boxplot all langs (log) | fastest? | KEEP | |
-| 5 | fig | time boxplots per paradigm (log) | spread | KEEP/**DECIDE** | redundancy Q |
+| 5 | fig | time boxplots per compiler (log) | spread | KEEP/**DECIDE** | redundancy Q |
 | 6–7 | md+fig | time-vs-CPU-energy scatter (Spearman) | correlation | KEEP | |
 | 8–9 | md+fig | time-vs-mem-energy scatter | correlation | KEEP/**DECIDE** | weaker correlation; keep? |
-| 10–11 | md+code | paradigm speed KW/MWU | significance | KEEP | stats |
+| 10–11 | md+code | compiler speed KW/MWU | significance | KEEP | stats |
 | 12–13 | md+fig | EDP ranking barh | overall efficiency | KEEP | |
 | 14–15 | md+fig | time heatmap per benchmark | per-cell time | KEEP | |
 
@@ -186,7 +186,7 @@ Plan hint: *"only Runtime startup disk overhead is expected to survive."*
 | 3–4 | md+code | multi-metric ranking table | overall ranking | KEEP | |
 | 5 | code | export `ranking_summary.csv` | — | KEEP | |
 | 6–7 | md+code | normalised efficiency table (ratio vs best) | CLBG-style ranking | KEEP | |
-| 8–9 | md+fig | paradigm radar chart | paradigm profile | KEEP/**DECIDE** | radar is debated for thesis rigor; bar alt? |
+| 8–9 | md+fig | compiler radar chart | compiler profile | KEEP/**DECIDE** | radar is debated for thesis rigor; bar alt? |
 | 10–11 | md+fig | normalised metrics heatmap | cross-metric profile | KEEP | |
 | 12–13 | md+code | top3/bottom3 prints | quick ref | KEEP | text |
 | 14–15 | md+code | key-findings print block | citation-ready summary | KEEP | text |
@@ -199,7 +199,7 @@ If you approve the cuts above, the thesis-figure set becomes:
 - **nb01 (cleaning):** outlier boxplot (methodology appendix)
 - **v2/01:** log distributions, coverage heatmap
 - **v2/02:** CPU energy boxplot, memory energy boxplot, stacked total energy,
-  CPU-vs-mem scatter, energy violins by paradigm, per-benchmark energy heatmap,
+  CPU-vs-mem scatter, energy violins by compiler, per-benchmark energy heatmap,
   CPU energy ranking
 - **v2/03:** time boxplot (log), time-vs-CPU-energy scatter, EDP ranking, time heatmap
 - **v2/04:** radar (if kept), normalised heatmap
@@ -213,7 +213,7 @@ Everything in **v1/02** and most of **v1/11** retires.
 
 1. **Retire `v1/02_visualization` entirely** — yes (delete the notebook).
 2. **Collapse `v1/11` to the startup-overhead figure only** — yes.
-3. **Per-paradigm split boxplots** (v2/02 c5,c8; v2/03 c5) — ~~CUT~~ → **REINSTATED**
+3. **Per-compiler split boxplots** (v2/02 c5,c8; v2/03 c5) — ~~CUT~~ → **REINSTATED**
    later by request (CPU + DRAM in v2/02, execution time on log scale in v2/03).
 4. **CO₂ carbon scatter** (v2/02 c20–21) — **CUT** for now.
 5. **Radar chart** (v2/04 c8–9) — **CUT**.
@@ -229,7 +229,7 @@ v2 notebooks are **hand-edited directly** and `generate_notebooks.py` is retired
 1. **Retire `v1/02_visualization` entirely?** (Y / keep the per-benchmark grid-bars
    only / keep whole notebook.)
 2. **Collapse `v1/11` to just the startup-overhead figure?** (Y / keep more.)
-3. **Per-paradigm split boxplots** (v2/02 c5,c8; v2/03 c5): keep alongside the
+3. **Per-compiler split boxplots** (v2/02 c5,c8; v2/03 c5): keep alongside the
    all-language boxplot, or CUT as redundant?
 4. **CO₂ carbon scatter** (v2/02 c21): keep or CUT (it's energy × constant)?
 5. **Radar chart** (v2/04 c9): keep, or replace with a grouped bar?
@@ -247,7 +247,7 @@ notebooks add that dir to `sys.path` (or place it at `notebooks/plot_style.py` a
 have v2 add the parent). I'll recommend **`notebooks/v2/plot_style.py`** imported via
 a 2-line `sys.path` shim, since the generator already writes into `v2/` and it keeps
 the module next to its primary consumers. It will expose: `apply_style()`,
-`PARADIGM_COLORS` (Okabe–Ito), `LANGUAGE_ORDER`, `PARADIGM`, `LANG_DISPLAY`,
+`COMPILER_COLORS` (Okabe–Ito), `LANGUAGE_ORDER`, `COMPILER`, `LANG_DISPLAY`,
 `MEANPROPS`, `save_fig(fig, name)` (→ 300-dpi vector PDF), and the `COL_*` constants.
 
 ---
@@ -266,9 +266,9 @@ inline PNG outputs).
 **Consistency after refactor:**
 - ✅ One shared style module (`notebooks/plot_style.py`) imported by every notebook;
   zero inline palette/rcParams duplication.
-- ✅ Single Okabe–Ito paradigm palette everywhere (AOT blue / JIT orange /
+- ✅ Single Okabe–Ito compiler palette everywhere (AOT blue / JIT orange /
   Interpreted green); colourblind- and grayscale-safe.
-- ✅ Paradigm **membership** now canonical everywhere — fixed the nb11 bug that
+- ✅ Compiler **membership** now canonical everywhere — fixed the nb11 bug that
   grouped Lua as JIT and dropped F#.
 - ✅ All figures titled, axis-labelled with units (J / ms / MB), and meaningfully
   sorted (by mean) or in canonical order.

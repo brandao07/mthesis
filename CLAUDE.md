@@ -36,11 +36,11 @@ pip install -r requirements.txt
 jupyter lab
 ```
 
-## Languages & Paradigms
+## Languages & Compilers
 
-18 languages across 3 execution paradigms:
+18 languages across 3 execution compilers:
 
-| Paradigm    | Languages |
+| Compiler    | Languages |
 |-------------|-----------|
 | AOT         | C, C++, C#, Dart, Go, Haskell, Java, OCaml, Rust, Swift |
 | JIT/VM      | Erlang, F#, JavaScript (Node.js), Ruby |
@@ -112,11 +112,11 @@ Jupyter notebooks for data analysis.
 **Shared style module — `notebooks/plot_style.py`:**
 Single source of truth for plotting. Imported by **every** notebook (v1 and v2) via a
 2-line `sys.path` shim. Exposes: `apply_style()` (sans-serif rcParams, light y-only
-grid, 300-dpi save), `PARADIGM_COLORS` (Okabe–Ito, colourblind- and grayscale-safe),
-`PARADIGM` / `LANG_DISPLAY` / `LANGUAGE_ORDER`, `MEANPROPS`, the `COL_*` metric-column
+grid, 300-dpi save), `COMPILER_COLORS` (Okabe–Ito, colourblind- and grayscale-safe),
+`COMPILER` / `LANG_DISPLAY` / `LANGUAGE_ORDER`, `MEANPROPS`, the `COL_*` metric-column
 constants, data helpers `load_runs()` / `cell_means()` / `lang_means()`, and
 `save_fig(fig, name)` → 300-dpi **vector PDF** into the shared `notebooks/figures/`.
-Colour is assigned **by paradigm (3 hues), never per-language**. Do not redefine the
+Colour is assigned **by compiler (3 hues), never per-language**. Do not redefine the
 palette or column names inline in a notebook — import them from here.
 
 **v1 (in `notebooks/`):**
@@ -130,17 +130,17 @@ Hand-maintained `.ipynb` files (the old `generate_notebooks.py` generator was re
 via `plot_style.load_runs()` — no inline outlier removal.
 
 - `01_data_profiling_v2.ipynb` — EDA: column overview, missing values, distributions, data coverage heatmap, per-language summary
-- `02_energy_analysis_v2.ipynb` — CPU + memory energy boxplots, paradigm violin plots, Kruskal-Wallis + Mann-Whitney U + Bonferroni + rank-biserial, per-benchmark heatmap, efficiency ranking
-- `03_time_analysis_v2.ipynb` — execution time boxplots (log scale), Spearman correlations, paradigm speed comparison, EDP ranking
+- `02_energy_analysis_v2.ipynb` — CPU + memory energy boxplots, compiler violin plots, Kruskal-Wallis + Mann-Whitney U + Bonferroni + rank-biserial, per-benchmark heatmap, efficiency ranking
+- `03_time_analysis_v2.ipynb` — execution time boxplots (log scale), Spearman correlations, compiler speed comparison, EDP ranking
 - `04_comparative_v2.ipynb` — normalized ranking table (ratio vs best language), multi-metric ranking (mean of benchmark means, sorted by EDP rank), normalised heatmap, top3/bottom3, key findings; exports `outputs/ranking_summary.csv`
-- `05_per_benchmark_v2.ipynb` — per-(benchmark × language) mean breakdown: 3 small-multiples figures (CPU energy, DRAM energy, execution time), each an 8-panel grid (one per benchmark) of value-labelled, paradigm-coloured language bars
+- `05_per_benchmark_v2.ipynb` — per-(benchmark × language) mean breakdown: 3 small-multiples figures (CPU energy, DRAM energy, execution time), each an 8-panel grid (one per benchmark) of value-labelled, compiler-coloured language bars
 
 **v2 key conventions:**
 - Thesis figures exported as 300-dpi vector PDF to `notebooks/figures/` (gitignored) via `plot_style.save_fig()`
 - Outputs (CSVs) saved to `notebooks/v2/outputs/` (gitignored)
 - Single source: `results_clean_runs.csv` only. `df_mean` (per-(language × benchmark) cell means) is computed inline via `plot_style.cell_means(df)` — no separate `results_clean.csv` file.
 - EDP = (CPU Energy + Memory Energy) × Time (J·ms), computed per cell in `df_mean`
-- Rankings, heatmaps and summary tables use the two-step mean: per-(language × benchmark) mean → per-language mean (equal benchmark weight), via `lang_means()`. Boxplots/violins remain distribution views (median visible, ordered by mean, mean marked); paradigm significance keeps the non-parametric Kruskal-Wallis / Mann-Whitney tests on the per-run data
+- Rankings, heatmaps and summary tables use the two-step mean: per-(language × benchmark) mean → per-language mean (equal benchmark weight), via `lang_means()`. Boxplots/violins remain distribution views (median visible, ordered by mean, mean marked); compiler significance keeps the non-parametric Kruskal-Wallis / Mann-Whitney tests on the per-run data
 
 ### `docs/`
 
