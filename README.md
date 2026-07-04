@@ -8,10 +8,6 @@ data-analysis pipeline.
 The thesis argument, interpretation, and conclusions belong to the dissertation itself.
 This README only describes **what the repository contains and how to run it.**
 
-## Results
-
-
-
 ## Overview
 
 The project measures **18 programming languages**, grouped into **3 execution compilers**,
