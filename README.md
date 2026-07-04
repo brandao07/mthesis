@@ -8,6 +8,10 @@ data-analysis pipeline.
 The thesis argument, interpretation, and conclusions belong to the dissertation itself.
 This README only describes **what the repository contains and how to run it.**
 
+## Results
+
+
+
 ## Overview
 
 The project measures **18 programming languages**, grouped into **3 execution compilers**,
@@ -17,7 +21,7 @@ on **8 core benchmarks** from the
 [Green Metrics Tool](https://github.com/green-coding-solutions/green-metrics-tool) (GMT),
 and the measurements are exported, cleaned, and analysed into per-language results.
 
-| Compiler    | Languages |
+| Execution Model    | Languages |
 |-------------|-----------|
 | AOT         | C, C++, C#, Dart, Go, Haskell, Java, OCaml, Rust, Swift |
 | JIT / VM    | Erlang, F#, JavaScript (Node.js), Ruby |
@@ -25,12 +29,6 @@ and the measurements are exported, cleaned, and analysed into per-language resul
 
 **Benchmarks:** `binary-trees`, `fannkuch-redux`, `fasta`, `k-nucleotide`, `mandelbrot`,
 `n-body`, `regex-redux`, `spectral-norm`.
-
-> Java uses GraalVM Native Image (AOT). C# and F# compile with .NET 9 Native AOT; F# is
-> grouped under JIT/VM because it targets the .NET runtime ecosystem. PHP is grouped under
-> Interpreted (CLBG convention): its wrappers load OPcache with a JIT buffer but never set
-> the `opcache.jit` mode, so JIT stays off and runs execute on the Zend VM. See
-> [`docs/flags.md`](docs/flags.md) for the per-language compiler flags and build settings.
 
 ## Repository Layout
 
@@ -49,178 +47,27 @@ and the measurements are exported, cleaned, and analysed into per-language resul
 - **`docs/`** — compiler flags, per-language CLBG implementation notes, and methodology.
 - **`green-metrics-tool/`** — GMT itself, cloned locally by `make setup` (not committed).
 
-## Results Pipeline
+## Quick Start
 
-```
-GMT runs → kwa export → kwa/results/measurements_<lang>.csv   (one file per language)
-         → scripts/merge_results.py
-         → results/results_linux.csv          (raw; µJ / µs / µg / bytes / mW)
-         → notebooks/01_data_cleaning.ipynb   (outlier removal + unit conversion)
-         → results/results_clean_runs.csv     (per-run, outliers removed)
-         → results/results_clean.csv          (mean per language × benchmark)
+Linux only (Ubuntu 22.04 / 24.04). Bootstrap the environment, then run a measurement:
+
+```bash
+make setup            # full local env (Docker, GMT, Go, Python) — see docs/setup.md
+make measure lang=go  # measure one language — see docs/usage.md
 ```
 
-Outliers are removed per (language × benchmark) group using a 1.5×IQR fence on CPU energy
-and execution time; units are converted to J / s / g / MB / W.
+Measurements flow through export → merge → clean into `results/`; see
+[`docs/pipeline.md`](docs/pipeline.md).
 
 ## Documentation
 
-- KWA v2 CLI docs: [`kwa/README.md`](kwa/README.md)
-
-## Linux Setup (Ubuntu 22.04/24.04)
-
-Use `make setup` to bootstrap the full local environment (Linux only):
-
-```bash
-make setup
-```
-
-`make setup`:
-
-- checks/install required base tools (`git`, `curl`, `make`, `gcc`, etc.)
-- installs Docker if missing and enables the daemon
-- installs/ensures Python `3.12`
-- installs/ensures the Go version required by `kwa/go.mod`
-- clones GMT into this repo at `./green-metrics-tool`
-- runs GMT `install_linux.sh` non-interactively with local URLs
-- attempts full metric-provider dependency setup, retrying with best-effort fallbacks for hardware-specific providers if needed
-- generates the benchmark input files (`inputs/fasta-*.txt`) via `scripts/generate_inputs.sh`
-
-Important notes:
-
-- This setup is intended for Ubuntu `22.04` and `24.04` only.
-- `sudo` is required.
-- If your user is newly added to the `docker` group, you may need to relogin (or run `newgrp docker`) before running Docker without sudo.
-- If `./green-metrics-tool` already exists, setup prompts whether to overwrite it.
-- DB defaults are sourced from `kwa/.env.example` (notably `DATABASE_PASSWORD`).
-
-## Uninstall
-
-Use `make uninstall` for safe local teardown:
-
-```bash
-make uninstall
-```
-
-`make uninstall`:
-
-- always asks whether to remove DB/data volume
-- stops/removes GMT containers (best effort)
-- runs `docker system prune` (best effort)
-- removes local artifacts:
-  - `kwa/build`
-  - `.gocache`
-  - `.gocache_local`
-  - `.gomodcache`
-  - `./green-metrics-tool`
-- prompts (Linux) whether to remove pre-install requirements and Docker packages
-
-Notes:
-
-- This uninstall flow is Linux-oriented and destructive.
-- `sudo` may be required for package/sudoers cleanup.
-
-## KWA Build/Run
-
-Build KWA binary into `kwa/build/kwa`:
-
-```bash
-make kwa-build
-```
-
-Run KWA directly from source (`kwa/cmd/main.go`):
-
-```bash
-make kwa-run
-```
-
-## Run Benchmarks
-
-Use `make measure` (wrapper around `scripts/measure.sh`):
-
-```bash
-make measure lang=go
-```
-
-Run all languages + all 8 core benchmarks in one combined run:
-
-```bash
-make measure
-```
-
-Filter language/benchmark and change profile/iterations:
-
-```bash
-make measure lang=go profile=measure
-make measure lang=go profile=test
-make measure lang=go,c bench=binary-trees,mandelbrot iterations=10
-make measure lang=rust iterations=3
-```
-
-`profile=measure` is the default.
-`iterations=1` is the default.
-
-## Direct Runner Script
-
-Direct script usage (future KWA-compatible shape):
-
-```bash
-scripts/measure.sh profile=measure lang=go,c,cpp bench=binary-trees,mandelbrot iterations=10
-```
-
-Supported script args (`key=value` only):
-
-- `profile=measure|test`
-- `lang=<csv>`
-- `bench=<csv>`
-- `iterations=<int>`
-- `gmt_dir=<path>` (optional, default: `./green-metrics-tool`)
-- `uri=<path>` (optional, default: repo root)
-
-When `lang` is omitted, all supported languages are used:
-
-- `c`
-- `cpp`
-- `csharp`
-- `dart`
-- `erlang`
-- `fsharp`
-- `go`
-- `haskell`
-- `java`
-- `lua`
-- `nodejs`
-- `ocaml`
-- `perl`
-- `php`
-- `python`
-- `ruby`
-- `rust`
-- `swift`
-
-When `bench` is omitted, these 8 core benchmarks are used:
-
-- `binary-trees`
-- `fannkuch-redux`
-- `k-nucleotide`
-- `n-body`
-- `regex-redux`
-- `spectral-norm`
-- `fasta`
-- `mandelbrot`
-
-Profile behavior:
-
-- `measure`: uses canonical files `benchmarks/<lang>/<benchmark>.yml` and does **not** pass `--dev-no-sleeps`
-- `test`: uses generated files `benchmarks/<lang>/<benchmark>_test.yml` and passes `--dev-no-sleeps`
-
-## Results
-
-> _To be completed._
-
-Cleaned data lives in `results/results_clean.csv` (mean per language × benchmark) and
-`results/results_clean_runs.csv` (per run). Analysis and figures are produced by the
-notebooks in `notebooks/` (see `notebooks/v2/`). A summary of findings will go here.
+- [`docs/setup.md`](docs/setup.md) — full setup and uninstall steps
+- [`docs/usage.md`](docs/usage.md) — running benchmarks and KWA build/run
+- [`docs/pipeline.md`](docs/pipeline.md) — results pipeline and outputs
+- [`docs/flags.md`](docs/flags.md) — per-language compiler flags and build settings
+- [`docs/benchmarks/`](docs/benchmarks/) — CLBG implementation notes and benchmark analysis
+- [`docs/credits.md`](docs/credits.md) — attribution for the CLBG source code
+- [`kwa/README.md`](kwa/README.md) — KWA CLI documentation
 
 ## References
 
