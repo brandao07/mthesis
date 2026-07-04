@@ -43,6 +43,12 @@
       "skillPath": "SKILL.md",
       "computedHash": "015c18f1fdacd779cdd5fa2795e3e088ef57f7a0dc7a5ebe9bb67245b29f8800"
     },
+    "latex-tables": {
+      "source": "terrylica/cc-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/doc-tools/skills/latex-tables/SKILL.md",
+      "computedHash": "dd26a6c348db0ec6a00ea71d879e1ab5c13056caca32b770260e28f4984c4a82"
+    },
     "software-architecture": {
       "source": "sickn33/antigravity-awesome-skills",
       "sourceType": "github",

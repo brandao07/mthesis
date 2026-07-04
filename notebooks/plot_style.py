@@ -44,7 +44,7 @@ FIGURES_DIR = _MODULE_DIR / "figures"                  # shared, gitignored
 # ── Measurement column names (units already converted by 01_data_cleaning) ─────
 COL_CPU_ENERGY = "cpu_energy_rapl_msr_component-package_0-j"
 COL_MEM_ENERGY = "memory_energy_rapl_msr_component-dram_0-j"
-COL_TIME = "phase_time_syscall_system-system-ms"
+COL_TIME = "phase_time_syscall_system-system-s"
 COL_CPU_CARBON = "cpu_carbon_rapl_msr_component-package_0-g"
 COL_MEM_CARBON = "memory_carbon_rapl_msr_component-dram_0-g"
 
@@ -170,7 +170,7 @@ def cell_means(df: pd.DataFrame) -> pd.DataFrame:
 
     Input: the per-run DataFrame from load_runs(). Averages every numeric metric
     column within each (language, benchmark) cell, re-attaches 'compiler', and
-    adds an 'EDP' column = (CPU + Memory energy) × time (J·ms). Returns the
+    adds an 'EDP' column = (CPU + Memory energy) × time (J·s). Returns the
     144-row cell-mean DataFrame. This is the building block for the two-step mean.
     """
     id_cols = {"run_id", "measured_at", "language", "benchmark", "compiler"}
@@ -285,7 +285,7 @@ def styled_table_fig(df, title, fname, highlight_col=None, row_compilers=None,
     if row_compilers is not None:                 # compiler legend below the table
         handles = [mpatches.Patch(color=COMPILER_COLORS[p], label=p, alpha=0.85)
                    for p in COMPILER_ORDER]
-        ax.legend(handles=handles, title="Compiler", loc="lower center",
+        ax.legend(handles=handles, title="Execution Model", loc="lower center",
                   bbox_to_anchor=(0.5, -0.04), ncol=len(COMPILER_ORDER), frameon=True)
 
     if title:
