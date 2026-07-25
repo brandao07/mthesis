@@ -20,7 +20,7 @@ and the measurements are exported, cleaned, and analysed into per-language resul
 | Execution Model    | Languages |
 |-------------|-----------|
 | AOT         | C, C++, C#, Dart, Go, Haskell, Java, OCaml, Rust, Swift |
-| JIT / VM    | Erlang, F#, JavaScript (Node.js), Ruby |
+| JIT     | Erlang, F#, JavaScript (Node.js), Ruby |
 | Interpreted | Lua, Perl, PHP, Python |
 
 **Benchmarks:** `binary-trees`, `fannkuch-redux`, `fasta`, `k-nucleotide`, `mandelbrot`,
