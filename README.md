@@ -1,4 +1,4 @@
-# Towards a More Accurate Understanding of Programming Language Energy Efficiency
+# Revisiting the Energy Efficiency of Programming Languages 10 Years Later
 
 This repository is the research artifact for a Master's thesis on the energy efficiency
 of programming languages. It runs a fixed suite of benchmarks across many languages under

@@ -195,13 +195,13 @@ def lang_means(df_mean: pd.DataFrame, cols):
 def save_fig(fig, name: str, fmt: str = "pdf"):
     """Export a figure to the shared figures/ directory as a 300-dpi vector PDF.
 
-    Inputs: a matplotlib Figure, a base filename (no extension), and an optional
-    format. Creates figures/ next to this module if needed and writes
-    figures/<name>.<fmt> with tight bounding box. Returns the output Path.
-    Side effect: writes a file to disk.
+    Inputs: a matplotlib Figure, a base filename (no extension, may include a
+    subdirectory such as "per_benchmark/foo"), and an optional format. Creates
+    the target directory if needed and writes figures/<name>.<fmt> with tight
+    bounding box. Returns the output Path. Side effect: writes a file to disk.
     """
-    FIGURES_DIR.mkdir(exist_ok=True)
     out = FIGURES_DIR / f"{name}.{fmt}"
+    out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=300, bbox_inches="tight")
     return out
 
